@@ -7,7 +7,6 @@ const path = require("path");
 // CREATE APP
 // --------------------
 const app = express();
-const PORT = 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -18,10 +17,10 @@ app.use(express.json());
 const fireData = require("./data/fires_with_location.json");
 const districtRisk = require("./data/district_risk.json");
 
-// 🔴 IMPORTANT: Read GeoJSON via fs (NOT require)
+// 🔴 IMPORTANT: Read GeoJSON using fs (Vercel-safe)
 const districtsGeoJSON = JSON.parse(
   fs.readFileSync(
-    path.join(__dirname, "data", "india_districts.geojson"),
+    path.join(process.cwd(), "data", "india_districts.geojson"),
     "utf8"
   )
 );
@@ -55,8 +54,6 @@ app.get("/api/districts", (req, res) => {
 });
 
 // --------------------
-// START SERVER
+// EXPORT APP (NO app.listen)
 // --------------------
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-});
+module.exports = app;
