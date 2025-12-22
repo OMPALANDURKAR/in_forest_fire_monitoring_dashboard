@@ -1,0 +1,2692 @@
+{
+  "raichur": {
+    "state": "Karnataka",
+    "fire_count": 646,
+    "risk": "High"
+  },
+  "east godavari": {
+    "state": "Andhra Pradesh",
+    "fire_count": 356,
+    "risk": "High"
+  },
+  "nalgonda": {
+    "state": "Andhra Pradesh",
+    "fire_count": 197,
+    "risk": "Medium"
+  },
+  "vishakhapatnam": {
+    "state": "Andhra Pradesh",
+    "fire_count": 199,
+    "risk": "Medium"
+  },
+  "gulbarga": {
+    "state": "Karnataka",
+    "fire_count": 886,
+    "risk": "High"
+  },
+  "mahbubnagar": {
+    "state": "Andhra Pradesh",
+    "fire_count": 288,
+    "risk": "High"
+  },
+  "rangareddi": {
+    "state": "Andhra Pradesh",
+    "fire_count": 69,
+    "risk": "Medium"
+  },
+  "bijapur": {
+    "state": "Karnataka",
+    "fire_count": 75,
+    "risk": "Medium"
+  },
+  "kurnool": {
+    "state": "Andhra Pradesh",
+    "fire_count": 227,
+    "risk": "High"
+  },
+  "prakasam": {
+    "state": "Andhra Pradesh",
+    "fire_count": 32,
+    "risk": "Low"
+  },
+  "koppal": {
+    "state": "Karnataka",
+    "fire_count": 170,
+    "risk": "Medium"
+  },
+  "krishna": {
+    "state": "Andhra Pradesh",
+    "fire_count": 399,
+    "risk": "High"
+  },
+  "guntur": {
+    "state": "Andhra Pradesh",
+    "fire_count": 617,
+    "risk": "High"
+  },
+  "hoshangabad": {
+    "state": "Madhya Pradesh",
+    "fire_count": 246,
+    "risk": "High"
+  },
+  "narsinghpur": {
+    "state": "Madhya Pradesh",
+    "fire_count": 186,
+    "risk": "Medium"
+  },
+  "jabalpur": {
+    "state": "Madhya Pradesh",
+    "fire_count": 1047,
+    "risk": "High"
+  },
+  "surguja": {
+    "state": "Chhattisgarh",
+    "fire_count": 42,
+    "risk": "Low"
+  },
+  "palamu": {
+    "state": "Jharkhand",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "sehore": {
+    "state": "Madhya Pradesh",
+    "fire_count": 58,
+    "risk": "Medium"
+  },
+  "raisen": {
+    "state": "Madhya Pradesh",
+    "fire_count": 331,
+    "risk": "High"
+  },
+  "katni": {
+    "state": "Madhya Pradesh",
+    "fire_count": 966,
+    "risk": "High"
+  },
+  "jaintia hills": {
+    "state": "Meghalaya",
+    "fire_count": 52,
+    "risk": "Medium"
+  },
+  "umaria": {
+    "state": "Madhya Pradesh",
+    "fire_count": 34,
+    "risk": "Low"
+  },
+  "dhamtari": {
+    "state": "Chhattisgarh",
+    "fire_count": 510,
+    "risk": "High"
+  },
+  "pune": {
+    "state": "Maharashtra",
+    "fire_count": 298,
+    "risk": "High"
+  },
+  "raipur": {
+    "state": "Chhattisgarh",
+    "fire_count": 2608,
+    "risk": "High"
+  },
+  "durg": {
+    "state": "Chhattisgarh",
+    "fire_count": 2088,
+    "risk": "High"
+  },
+  "gondiya": {
+    "state": "Maharashtra",
+    "fire_count": 44,
+    "risk": "Low"
+  },
+  "raj nandgaon": {
+    "state": "Chhattisgarh",
+    "fire_count": 539,
+    "risk": "High"
+  },
+  "bhandara": {
+    "state": "Maharashtra",
+    "fire_count": 70,
+    "risk": "Medium"
+  },
+  "jharsuguda": {
+    "state": "Orissa",
+    "fire_count": 318,
+    "risk": "High"
+  },
+  "sambalpur": {
+    "state": "Orissa",
+    "fire_count": 447,
+    "risk": "High"
+  },
+  "sundargarh": {
+    "state": "Orissa",
+    "fire_count": 919,
+    "risk": "High"
+  },
+  "jalna": {
+    "state": "Maharashtra",
+    "fire_count": 66,
+    "risk": "Medium"
+  },
+  "west midnapore": {
+    "state": "West Bengal",
+    "fire_count": 1211,
+    "risk": "High"
+  },
+  "buldana": {
+    "state": "Maharashtra",
+    "fire_count": 28,
+    "risk": "Low"
+  },
+  "raigarh": {
+    "state": "Maharashtra",
+    "fire_count": 1274,
+    "risk": "High"
+  },
+  "balaghat": {
+    "state": "Madhya Pradesh",
+    "fire_count": 51,
+    "risk": "Medium"
+  },
+  "nagpur": {
+    "state": "Maharashtra",
+    "fire_count": 235,
+    "risk": "High"
+  },
+  "haora": {
+    "state": "West Bengal",
+    "fire_count": 13,
+    "risk": "Low"
+  },
+  "hugli": {
+    "state": "West Bengal",
+    "fire_count": 223,
+    "risk": "High"
+  },
+  "saraikela kharsawan": {
+    "state": "Jharkhand",
+    "fire_count": 291,
+    "risk": "High"
+  },
+  "ashoknagar": {
+    "state": "Madhya Pradesh",
+    "fire_count": 51,
+    "risk": "Medium"
+  },
+  "buxar": {
+    "state": "Bihar",
+    "fire_count": 272,
+    "risk": "High"
+  },
+  "madhepura": {
+    "state": "Bihar",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "darrang": {
+    "state": "Assam",
+    "fire_count": 22,
+    "risk": "Low"
+  },
+  "ghazipur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 145,
+    "risk": "Medium"
+  },
+  "araria": {
+    "state": "Bihar",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "panna": {
+    "state": "Madhya Pradesh",
+    "fire_count": 67,
+    "risk": "Medium"
+  },
+  "satna": {
+    "state": "Madhya Pradesh",
+    "fire_count": 619,
+    "risk": "High"
+  },
+  "vidisha": {
+    "state": "Madhya Pradesh",
+    "fire_count": 77,
+    "risk": "Medium"
+  },
+  "uttar dinajpur": {
+    "state": "West Bengal",
+    "fire_count": 55,
+    "risk": "Medium"
+  },
+  "rewa": {
+    "state": "Madhya Pradesh",
+    "fire_count": 242,
+    "risk": "High"
+  },
+  "patna": {
+    "state": "Bihar",
+    "fire_count": 113,
+    "risk": "Medium"
+  },
+  "purnia": {
+    "state": "Bihar",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "nalanda": {
+    "state": "Bihar",
+    "fire_count": 178,
+    "risk": "Medium"
+  },
+  "katihar": {
+    "state": "Bihar",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "jehanabad": {
+    "state": "Bihar",
+    "fire_count": 22,
+    "risk": "Low"
+  },
+  "damoh": {
+    "state": "Madhya Pradesh",
+    "fire_count": 30,
+    "risk": "Low"
+  },
+  "karbi anglong": {
+    "state": "Assam",
+    "fire_count": 15,
+    "risk": "Low"
+  },
+  "bhopal": {
+    "state": "Madhya Pradesh",
+    "fire_count": 24,
+    "risk": "Low"
+  },
+  "sonbhadra": {
+    "state": "Uttar Pradesh",
+    "fire_count": 77,
+    "risk": "Medium"
+  },
+  "sidhi": {
+    "state": "Madhya Pradesh",
+    "fire_count": 301,
+    "risk": "High"
+  },
+  "gaya": {
+    "state": "Bihar",
+    "fire_count": 58,
+    "risk": "Medium"
+  },
+  "ahmadabad": {
+    "state": "Gujarat",
+    "fire_count": 138,
+    "risk": "Medium"
+  },
+  "nawada": {
+    "state": "Bihar",
+    "fire_count": 57,
+    "risk": "Medium"
+  },
+  "sheikhpura": {
+    "state": "Bihar",
+    "fire_count": 42,
+    "risk": "Low"
+  },
+  "vadodara": {
+    "state": "Gujarat",
+    "fire_count": 87,
+    "risk": "Medium"
+  },
+  "banka": {
+    "state": "Bihar",
+    "fire_count": 15,
+    "risk": "Low"
+  },
+  "east garo hills": {
+    "state": "Meghalaya",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "godda": {
+    "state": "Jharkhand",
+    "fire_count": 98,
+    "risk": "Medium"
+  },
+  "jalgaon": {
+    "state": "Maharashtra",
+    "fire_count": 88,
+    "risk": "Medium"
+  },
+  "bilaspur": {
+    "state": "Chhattisgarh",
+    "fire_count": 577,
+    "risk": "High"
+  },
+  "barddhaman": {
+    "state": "West Bengal",
+    "fire_count": 927,
+    "risk": "High"
+  },
+  "bankura": {
+    "state": "West Bengal",
+    "fire_count": 264,
+    "risk": "High"
+  },
+  "kawardha": {
+    "state": "Chhattisgarh",
+    "fire_count": 142,
+    "risk": "Medium"
+  },
+  "betul": {
+    "state": "Madhya Pradesh",
+    "fire_count": 73,
+    "risk": "Medium"
+  },
+  "seoni": {
+    "state": "Madhya Pradesh",
+    "fire_count": 236,
+    "risk": "High"
+  },
+  "nadia": {
+    "state": "West Bengal",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "birbhum": {
+    "state": "West Bengal",
+    "fire_count": 213,
+    "risk": "High"
+  },
+  "bishnupur": {
+    "state": "Manipur",
+    "fire_count": 42,
+    "risk": "Low"
+  },
+  "mandla": {
+    "state": "Madhya Pradesh",
+    "fire_count": 159,
+    "risk": "Medium"
+  },
+  "ballia": {
+    "state": "Uttar Pradesh",
+    "fire_count": 132,
+    "risk": "Medium"
+  },
+  "saran": {
+    "state": "Bihar",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "guna": {
+    "state": "Madhya Pradesh",
+    "fire_count": 37,
+    "risk": "Low"
+  },
+  "mau": {
+    "state": "Uttar Pradesh",
+    "fire_count": 43,
+    "risk": "Low"
+  },
+  "siwan": {
+    "state": "Bihar",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "papum pare": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "tinsukia": {
+    "state": "Assam",
+    "fire_count": 57,
+    "risk": "Medium"
+  },
+  "banda": {
+    "state": "Uttar Pradesh",
+    "fire_count": 89,
+    "risk": "Medium"
+  },
+  "muzaffarpur": {
+    "state": "Bihar",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "shahdol": {
+    "state": "Madhya Pradesh",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "jajpur": {
+    "state": "Orissa",
+    "fire_count": 429,
+    "risk": "High"
+  },
+  "bolangir": {
+    "state": "Orissa",
+    "fire_count": 41,
+    "risk": "Low"
+  },
+  "parbhani": {
+    "state": "Maharashtra",
+    "fire_count": 82,
+    "risk": "Medium"
+  },
+  "hingoli": {
+    "state": "Maharashtra",
+    "fire_count": 50,
+    "risk": "Medium"
+  },
+  "nizamabad": {
+    "state": "Andhra Pradesh",
+    "fire_count": 541,
+    "risk": "High"
+  },
+  "srikakulam": {
+    "state": "Andhra Pradesh",
+    "fire_count": 57,
+    "risk": "Medium"
+  },
+  "khammam": {
+    "state": "Andhra Pradesh",
+    "fire_count": 267,
+    "risk": "High"
+  },
+  "solapur": {
+    "state": "Maharashtra",
+    "fire_count": 228,
+    "risk": "High"
+  },
+  "medak": {
+    "state": "Andhra Pradesh",
+    "fire_count": 380,
+    "risk": "High"
+  },
+  "osmanabad": {
+    "state": "Maharashtra",
+    "fire_count": 80,
+    "risk": "Medium"
+  },
+  "karimnagar": {
+    "state": "Andhra Pradesh",
+    "fire_count": 671,
+    "risk": "High"
+  },
+  "nabarangpur": {
+    "state": "Orissa",
+    "fire_count": 64,
+    "risk": "Medium"
+  },
+  "dhenkanal": {
+    "state": "Orissa",
+    "fire_count": 412,
+    "risk": "High"
+  },
+  "kalahandi": {
+    "state": "Orissa",
+    "fire_count": 89,
+    "risk": "Medium"
+  },
+  "nanded": {
+    "state": "Maharashtra",
+    "fire_count": 88,
+    "risk": "Medium"
+  },
+  "kanker": {
+    "state": "Chhattisgarh",
+    "fire_count": 136,
+    "risk": "Medium"
+  },
+  "angul": {
+    "state": "Orissa",
+    "fire_count": 954,
+    "risk": "High"
+  },
+  "ahmednagar": {
+    "state": "Maharashtra",
+    "fire_count": 230,
+    "risk": "High"
+  },
+  "thoubal": {
+    "state": "Manipur",
+    "fire_count": 19,
+    "risk": "Low"
+  },
+  "bokaro": {
+    "state": "Jharkhand",
+    "fire_count": 411,
+    "risk": "High"
+  },
+  "murshidabad": {
+    "state": "West Bengal",
+    "fire_count": 24,
+    "risk": "Low"
+  },
+  "dhanbad": {
+    "state": "Jharkhand",
+    "fire_count": 1976,
+    "risk": "High"
+  },
+  "koriya": {
+    "state": "Chhattisgarh",
+    "fire_count": 249,
+    "risk": "High"
+  },
+  "surat": {
+    "state": "Gujarat",
+    "fire_count": 380,
+    "risk": "High"
+  },
+  "latehar": {
+    "state": "Jharkhand",
+    "fire_count": 121,
+    "risk": "Medium"
+  },
+  "sheopur": {
+    "state": "Madhya Pradesh",
+    "fire_count": 1579,
+    "risk": "High"
+  },
+  "gurdaspur": {
+    "state": "Punjab",
+    "fire_count": 27,
+    "risk": "Low"
+  },
+  "jalandhar": {
+    "state": "Punjab",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "amritsar": {
+    "state": "Punjab",
+    "fire_count": 10,
+    "risk": "Low"
+  },
+  "firozpur": {
+    "state": "Punjab",
+    "fire_count": 44,
+    "risk": "Low"
+  },
+  "nawan shehar": {
+    "state": "Punjab",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "moga": {
+    "state": "Punjab",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "muktsar": {
+    "state": "Punjab",
+    "fire_count": 30,
+    "risk": "Low"
+  },
+  "patiala": {
+    "state": "Punjab",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "sirsa": {
+    "state": "Haryana",
+    "fire_count": 18,
+    "risk": "Low"
+  },
+  "bathinda": {
+    "state": "Punjab",
+    "fire_count": 46,
+    "risk": "Low"
+  },
+  "hanumangarh": {
+    "state": "Rajasthan",
+    "fire_count": 87,
+    "risk": "Medium"
+  },
+  "ganganagar": {
+    "state": "Rajasthan",
+    "fire_count": 76,
+    "risk": "Medium"
+  },
+  "kaithal": {
+    "state": "Haryana",
+    "fire_count": 27,
+    "risk": "Low"
+  },
+  "hisar": {
+    "state": "Haryana",
+    "fire_count": 31,
+    "risk": "Low"
+  },
+  "haridwar": {
+    "state": "Uttaranchal",
+    "fire_count": 36,
+    "risk": "Low"
+  },
+  "muzaffarnagar": {
+    "state": "Uttar Pradesh",
+    "fire_count": 153,
+    "risk": "Medium"
+  },
+  "jind": {
+    "state": "Haryana",
+    "fire_count": 27,
+    "risk": "Low"
+  },
+  "baghpat": {
+    "state": "Uttar Pradesh",
+    "fire_count": 76,
+    "risk": "Medium"
+  },
+  "sonepat": {
+    "state": "Haryana",
+    "fire_count": 25,
+    "risk": "Low"
+  },
+  "meerut": {
+    "state": "Uttar Pradesh",
+    "fire_count": 114,
+    "risk": "Medium"
+  },
+  "bijnor": {
+    "state": "Uttar Pradesh",
+    "fire_count": 56,
+    "risk": "Medium"
+  },
+  "udham singh nagar": {
+    "state": "Uttaranchal",
+    "fire_count": 45,
+    "risk": "Low"
+  },
+  "ghaziabad": {
+    "state": "Uttar Pradesh",
+    "fire_count": 75,
+    "risk": "Medium"
+  },
+  "moradabad": {
+    "state": "Uttar Pradesh",
+    "fire_count": 64,
+    "risk": "Medium"
+  },
+  "bareilly": {
+    "state": "Uttar Pradesh",
+    "fire_count": 72,
+    "risk": "Medium"
+  },
+  "pilibhit": {
+    "state": "Uttar Pradesh",
+    "fire_count": 133,
+    "risk": "Medium"
+  },
+  "lakhimpur kheri": {
+    "state": "Uttar Pradesh",
+    "fire_count": 375,
+    "risk": "High"
+  },
+  "etah": {
+    "state": "Uttar Pradesh",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "shahjahanpur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 178,
+    "risk": "Medium"
+  },
+  "farrukhabad": {
+    "state": "Uttar Pradesh",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "mainpuri": {
+    "state": "Uttar Pradesh",
+    "fire_count": 35,
+    "risk": "Low"
+  },
+  "sitapur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 163,
+    "risk": "Medium"
+  },
+  "firozabad": {
+    "state": "Uttar Pradesh",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "maharajganj": {
+    "state": "Uttar Pradesh",
+    "fire_count": 513,
+    "risk": "High"
+  },
+  "sant kabir nagar": {
+    "state": "Uttar Pradesh",
+    "fire_count": 31,
+    "risk": "Low"
+  },
+  "jalaun": {
+    "state": "Uttar Pradesh",
+    "fire_count": 228,
+    "risk": "High"
+  },
+  "kanpur dehat": {
+    "state": "Uttar Pradesh",
+    "fire_count": 143,
+    "risk": "Medium"
+  },
+  "kota": {
+    "state": "Rajasthan",
+    "fire_count": 115,
+    "risk": "Medium"
+  },
+  "bara banki": {
+    "state": "Uttar Pradesh",
+    "fire_count": 38,
+    "risk": "Low"
+  },
+  "bhind": {
+    "state": "Madhya Pradesh",
+    "fire_count": 256,
+    "risk": "High"
+  },
+  "gwalior": {
+    "state": "Madhya Pradesh",
+    "fire_count": 1833,
+    "risk": "High"
+  },
+  "unnao": {
+    "state": "Uttar Pradesh",
+    "fire_count": 56,
+    "risk": "Medium"
+  },
+  "faizabad": {
+    "state": "Uttar Pradesh",
+    "fire_count": 29,
+    "risk": "Low"
+  },
+  "bundi": {
+    "state": "Rajasthan",
+    "fire_count": 75,
+    "risk": "Medium"
+  },
+  "datia": {
+    "state": "Madhya Pradesh",
+    "fire_count": 1063,
+    "risk": "High"
+  },
+  "pashchim champaran": {
+    "state": "Bihar",
+    "fire_count": 117,
+    "risk": "Medium"
+  },
+  "gorakhpur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 106,
+    "risk": "Medium"
+  },
+  "rae bareli": {
+    "state": "Uttar Pradesh",
+    "fire_count": 165,
+    "risk": "Medium"
+  },
+  "kanpur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 23,
+    "risk": "Low"
+  },
+  "kushinagar": {
+    "state": "Uttar Pradesh",
+    "fire_count": 225,
+    "risk": "High"
+  },
+  "bahraich": {
+    "state": "Uttar Pradesh",
+    "fire_count": 55,
+    "risk": "Medium"
+  },
+  "hardoi": {
+    "state": "Uttar Pradesh",
+    "fire_count": 84,
+    "risk": "Medium"
+  },
+  "shravasti": {
+    "state": "Uttar Pradesh",
+    "fire_count": 41,
+    "risk": "Low"
+  },
+  "etawah": {
+    "state": "Uttar Pradesh",
+    "fire_count": 49,
+    "risk": "Low"
+  },
+  "kannauj": {
+    "state": "Uttar Pradesh",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "auraiya": {
+    "state": "Uttar Pradesh",
+    "fire_count": 126,
+    "risk": "Medium"
+  },
+  "gonda": {
+    "state": "Uttar Pradesh",
+    "fire_count": 52,
+    "risk": "Medium"
+  },
+  "siddharth nagar": {
+    "state": "Uttar Pradesh",
+    "fire_count": 88,
+    "risk": "Medium"
+  },
+  "sawai madhopur": {
+    "state": "Rajasthan",
+    "fire_count": 40,
+    "risk": "Low"
+  },
+  "balrampur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 49,
+    "risk": "Low"
+  },
+  "lucknow": {
+    "state": "Uttar Pradesh",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "jhansi": {
+    "state": "Uttar Pradesh",
+    "fire_count": 469,
+    "risk": "High"
+  },
+  "baran": {
+    "state": "Rajasthan",
+    "fire_count": 29,
+    "risk": "Low"
+  },
+  "shivpuri": {
+    "state": "Madhya Pradesh",
+    "fire_count": 448,
+    "risk": "High"
+  },
+  "west siang": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "sultanpur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 168,
+    "risk": "Medium"
+  },
+  "ambedkar nagar": {
+    "state": "Uttar Pradesh",
+    "fire_count": 129,
+    "risk": "Medium"
+  },
+  "deoria": {
+    "state": "Uttar Pradesh",
+    "fire_count": 94,
+    "risk": "Medium"
+  },
+  "east siang": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 58,
+    "risk": "Medium"
+  },
+  "azamgarh": {
+    "state": "Uttar Pradesh",
+    "fire_count": 78,
+    "risk": "Medium"
+  },
+  "pratapgarh": {
+    "state": "Uttar Pradesh",
+    "fire_count": 65,
+    "risk": "Medium"
+  },
+  "fatehpur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 104,
+    "risk": "Medium"
+  },
+  "hamirpur": {
+    "state": "Himachal Pradesh",
+    "fire_count": 73,
+    "risk": "Medium"
+  },
+  "lohit": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 74,
+    "risk": "Medium"
+  },
+  "gopalganj": {
+    "state": "Bihar",
+    "fire_count": 25,
+    "risk": "Low"
+  },
+  "jaunpur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 84,
+    "risk": "Medium"
+  },
+  "patan": {
+    "state": "Gujarat",
+    "fire_count": 32,
+    "risk": "Low"
+  },
+  "sitamarhi": {
+    "state": "Bihar",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "jammu": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 42,
+    "risk": "Low"
+  },
+  "dharwad": {
+    "state": "Karnataka",
+    "fire_count": 50,
+    "risk": "Medium"
+  },
+  "bellary": {
+    "state": "Karnataka",
+    "fire_count": 661,
+    "risk": "High"
+  },
+  "thane": {
+    "state": "Maharashtra",
+    "fire_count": 122,
+    "risk": "Medium"
+  },
+  "ratnagiri": {
+    "state": "Maharashtra",
+    "fire_count": 80,
+    "risk": "Medium"
+  },
+  "kolhapur": {
+    "state": "Maharashtra",
+    "fire_count": 55,
+    "risk": "Medium"
+  },
+  "satara": {
+    "state": "Maharashtra",
+    "fire_count": 100,
+    "risk": "Medium"
+  },
+  "junagadh": {
+    "state": "Gujarat",
+    "fire_count": 35,
+    "risk": "Low"
+  },
+  "valsad": {
+    "state": "Gujarat",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "aurangabad": {
+    "state": "Maharashtra",
+    "fire_count": 224,
+    "risk": "High"
+  },
+  "rajkot": {
+    "state": "Gujarat",
+    "fire_count": 47,
+    "risk": "Low"
+  },
+  "jaisalmer": {
+    "state": "Rajasthan",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "bikaner": {
+    "state": "Rajasthan",
+    "fire_count": 21,
+    "risk": "Low"
+  },
+  "baramula (kashmir north)": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 92,
+    "risk": "Medium"
+  },
+  "hazaribag": {
+    "state": "Jharkhand",
+    "fire_count": 385,
+    "risk": "High"
+  },
+  "chatra": {
+    "state": "Jharkhand",
+    "fire_count": 62,
+    "risk": "Medium"
+  },
+  "ranchi": {
+    "state": "Jharkhand",
+    "fire_count": 69,
+    "risk": "Medium"
+  },
+  "purba singhbhum": {
+    "state": "Jharkhand",
+    "fire_count": 276,
+    "risk": "High"
+  },
+  "east midnapore": {
+    "state": "West Bengal",
+    "fire_count": 189,
+    "risk": "Medium"
+  },
+  "pashchim singhbhum": {
+    "state": "Jharkhand",
+    "fire_count": 13,
+    "risk": "Low"
+  },
+  "keonjhar": {
+    "state": "Orissa",
+    "fire_count": 125,
+    "risk": "Medium"
+  },
+  "korba": {
+    "state": "Chhattisgarh",
+    "fire_count": 383,
+    "risk": "High"
+  },
+  "baleshwar": {
+    "state": "Orissa",
+    "fire_count": 106,
+    "risk": "Medium"
+  },
+  "janjgir-champa": {
+    "state": "Chhattisgarh",
+    "fire_count": 698,
+    "risk": "High"
+  },
+  "dhar": {
+    "state": "Madhya Pradesh",
+    "fire_count": 48,
+    "risk": "Low"
+  },
+  "puruliya": {
+    "state": "West Bengal",
+    "fire_count": 107,
+    "risk": "Medium"
+  },
+  "rohtas": {
+    "state": "Bihar",
+    "fire_count": 1383,
+    "risk": "High"
+  },
+  "deoghar": {
+    "state": "Jharkhand",
+    "fire_count": 27,
+    "risk": "Low"
+  },
+  "faridabad": {
+    "state": "Haryana",
+    "fire_count": 66,
+    "risk": "Medium"
+  },
+  "jhajjar": {
+    "state": "Haryana",
+    "fire_count": 46,
+    "risk": "Low"
+  },
+  "golaghat": {
+    "state": "Assam",
+    "fire_count": 26,
+    "risk": "Low"
+  },
+  "jorhat": {
+    "state": "Assam",
+    "fire_count": 33,
+    "risk": "Low"
+  },
+  "panipat": {
+    "state": "Haryana",
+    "fire_count": 30,
+    "risk": "Low"
+  },
+  "dibrugarh": {
+    "state": "Assam",
+    "fire_count": 112,
+    "risk": "Medium"
+  },
+  "kurukshetra": {
+    "state": "Haryana",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "mahasamund": {
+    "state": "Chhattisgarh",
+    "fire_count": 1377,
+    "risk": "High"
+  },
+  "bharuch": {
+    "state": "Gujarat",
+    "fire_count": 80,
+    "risk": "Medium"
+  },
+  "sirmaur": {
+    "state": "Himachal Pradesh",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "haveri": {
+    "state": "Karnataka",
+    "fire_count": 65,
+    "risk": "Medium"
+  },
+  "cuttack": {
+    "state": "Orissa",
+    "fire_count": 37,
+    "risk": "Low"
+  },
+  "chandrapur": {
+    "state": "Maharashtra",
+    "fire_count": 137,
+    "risk": "Medium"
+  },
+  "chitrakoot": {
+    "state": "Uttar Pradesh",
+    "fire_count": 27,
+    "risk": "Low"
+  },
+  "varanasi": {
+    "state": "Uttar Pradesh",
+    "fire_count": 13,
+    "risk": "Low"
+  },
+  "bagalkot": {
+    "state": "Karnataka",
+    "fire_count": 144,
+    "risk": "Medium"
+  },
+  "sindhudurg": {
+    "state": "Maharashtra",
+    "fire_count": 92,
+    "risk": "Medium"
+  },
+  "anantapur": {
+    "state": "Andhra Pradesh",
+    "fire_count": 112,
+    "risk": "Medium"
+  },
+  "greater bombay": {
+    "state": "Maharashtra",
+    "fire_count": 68,
+    "risk": "Medium"
+  },
+  "bastar": {
+    "state": "Chhattisgarh",
+    "fire_count": 195,
+    "risk": "Medium"
+  },
+  "chittaurgarh": {
+    "state": "Rajasthan",
+    "fire_count": 101,
+    "risk": "Medium"
+  },
+  "jodhpur": {
+    "state": "Rajasthan",
+    "fire_count": 326,
+    "risk": "High"
+  },
+  "kachchh": {
+    "state": "Gujarat",
+    "fire_count": 235,
+    "risk": "High"
+  },
+  "nagaur": {
+    "state": "Rajasthan",
+    "fire_count": 55,
+    "risk": "Medium"
+  },
+  "pali": {
+    "state": "Rajasthan",
+    "fire_count": 28,
+    "risk": "Low"
+  },
+  "jamnagar": {
+    "state": "Gujarat",
+    "fire_count": 146,
+    "risk": "Medium"
+  },
+  "surendranagar": {
+    "state": "Gujarat",
+    "fire_count": 118,
+    "risk": "Medium"
+  },
+  "amreli": {
+    "state": "Gujarat",
+    "fire_count": 39,
+    "risk": "Low"
+  },
+  "south goa": {
+    "state": "Goa",
+    "fire_count": 32,
+    "risk": "Low"
+  },
+  "saiha": {
+    "state": "Mizoram",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "malkangiri": {
+    "state": "Orissa",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "west godavari": {
+    "state": "Andhra Pradesh",
+    "fire_count": 372,
+    "risk": "High"
+  },
+  "east imphal": {
+    "state": "Manipur",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "senapati": {
+    "state": "Manipur",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "cachar": {
+    "state": "Assam",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "phek": {
+    "state": "Nagaland",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "west khasi hills": {
+    "state": "Meghalaya",
+    "fire_count": 43,
+    "risk": "Low"
+  },
+  "lakhimpur": {
+    "state": "Assam",
+    "fire_count": 88,
+    "risk": "Medium"
+  },
+  "sonitpur": {
+    "state": "Assam",
+    "fire_count": 25,
+    "risk": "Low"
+  },
+  "changlang": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 14,
+    "risk": "Low"
+  },
+  "kokrajhar": {
+    "state": "Assam",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "dhemaji": {
+    "state": "Assam",
+    "fire_count": 60,
+    "risk": "Medium"
+  },
+  "lower subansiri": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 21,
+    "risk": "Low"
+  },
+  "kaushambi": {
+    "state": "Uttar Pradesh",
+    "fire_count": 34,
+    "risk": "Low"
+  },
+  "allahabad": {
+    "state": "Uttar Pradesh",
+    "fire_count": 93,
+    "risk": "Medium"
+  },
+  "lower dibang valley": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 35,
+    "risk": "Low"
+  },
+  "ri-bhoi": {
+    "state": "Meghalaya",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "kamrup": {
+    "state": "Assam",
+    "fire_count": 14,
+    "risk": "Low"
+  },
+  "lunglei": {
+    "state": "Mizoram",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "baragarh": {
+    "state": "Orissa",
+    "fire_count": 176,
+    "risk": "Medium"
+  },
+  "dehra dun": {
+    "state": "Uttaranchal",
+    "fire_count": 41,
+    "risk": "Low"
+  },
+  "shimla": {
+    "state": "Himachal Pradesh",
+    "fire_count": 135,
+    "risk": "Medium"
+  },
+  "bid": {
+    "state": "Maharashtra",
+    "fire_count": 102,
+    "risk": "Medium"
+  },
+  "latur": {
+    "state": "Maharashtra",
+    "fire_count": 47,
+    "risk": "Low"
+  },
+  "sangli": {
+    "state": "Maharashtra",
+    "fire_count": 88,
+    "risk": "Medium"
+  },
+  "belgaum": {
+    "state": "Karnataka",
+    "fire_count": 131,
+    "risk": "Medium"
+  },
+  "gadag": {
+    "state": "Karnataka",
+    "fire_count": 53,
+    "risk": "Medium"
+  },
+  "cuddapah": {
+    "state": "Andhra Pradesh",
+    "fire_count": 22,
+    "risk": "Low"
+  },
+  "tumkur": {
+    "state": "Karnataka",
+    "fire_count": 67,
+    "risk": "Medium"
+  },
+  "anand": {
+    "state": "Gujarat",
+    "fire_count": 20,
+    "risk": "Low"
+  },
+  "west nimar": {
+    "state": "Madhya Pradesh",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "chhindwara": {
+    "state": "Madhya Pradesh",
+    "fire_count": 37,
+    "risk": "Low"
+  },
+  "mansa": {
+    "state": "Punjab",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "fatehabad": {
+    "state": "Haryana",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "rohtak": {
+    "state": "Haryana",
+    "fire_count": 24,
+    "risk": "Low"
+  },
+  "karauli": {
+    "state": "Rajasthan",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "kupwara (muzaffarabad)": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 63,
+    "risk": "Medium"
+  },
+  "churachandpur": {
+    "state": "Manipur",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "chandauli": {
+    "state": "Uttar Pradesh",
+    "fire_count": 346,
+    "risk": "High"
+  },
+  "yavatmal": {
+    "state": "Maharashtra",
+    "fire_count": 65,
+    "risk": "Medium"
+  },
+  "south 24 parganas": {
+    "state": "West Bengal",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "fatehgarh sahib": {
+    "state": "Punjab",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "jaipur": {
+    "state": "Rajasthan",
+    "fire_count": 40,
+    "risk": "Low"
+  },
+  "kapurthala": {
+    "state": "Punjab",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "mahesana": {
+    "state": "Gujarat",
+    "fire_count": 15,
+    "risk": "Low"
+  },
+  "sirohi": {
+    "state": "Rajasthan",
+    "fire_count": 41,
+    "risk": "Low"
+  },
+  "udaipur": {
+    "state": "Rajasthan",
+    "fire_count": 10,
+    "risk": "Low"
+  },
+  "chitradurga": {
+    "state": "Karnataka",
+    "fire_count": 26,
+    "risk": "Low"
+  },
+  "dimapur": {
+    "state": "Nagaland",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "tamenglong": {
+    "state": "Manipur",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "champhai": {
+    "state": "Mizoram",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "bhojpur": {
+    "state": "Bihar",
+    "fire_count": 83,
+    "risk": "Medium"
+  },
+  "mon": {
+    "state": "Nagaland",
+    "fire_count": 45,
+    "risk": "Low"
+  },
+  "barpeta": {
+    "state": "Assam",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "wokha": {
+    "state": "Nagaland",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "nagaon": {
+    "state": "Assam",
+    "fire_count": 36,
+    "risk": "Low"
+  },
+  "davanagere": {
+    "state": "Karnataka",
+    "fire_count": 44,
+    "risk": "Low"
+  },
+  "coimbatore": {
+    "state": "Tamil Nadu",
+    "fire_count": 23,
+    "risk": "Low"
+  },
+  "theni": {
+    "state": "Tamil Nadu",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "madurai": {
+    "state": "Tamil Nadu",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "nellore": {
+    "state": "Andhra Pradesh",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "nashik": {
+    "state": "Maharashtra",
+    "fire_count": 106,
+    "risk": "Medium"
+  },
+  "dhule": {
+    "state": "Maharashtra",
+    "fire_count": 29,
+    "risk": "Low"
+  },
+  "nandurbar": {
+    "state": "Maharashtra",
+    "fire_count": 46,
+    "risk": "Low"
+  },
+  "barwani": {
+    "state": "Madhya Pradesh",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "dewas": {
+    "state": "Madhya Pradesh",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "harda": {
+    "state": "Madhya Pradesh",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "bidar": {
+    "state": "Karnataka",
+    "fire_count": 21,
+    "risk": "Low"
+  },
+  "bhavnagar": {
+    "state": "Gujarat",
+    "fire_count": 38,
+    "risk": "Low"
+  },
+  "dindori": {
+    "state": "Madhya Pradesh",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "gautam buddha nagar": {
+    "state": "Uttar Pradesh",
+    "fire_count": 21,
+    "risk": "Low"
+  },
+  "aligarh": {
+    "state": "Uttar Pradesh",
+    "fire_count": 21,
+    "risk": "Low"
+  },
+  "badaun": {
+    "state": "Uttar Pradesh",
+    "fire_count": 41,
+    "risk": "Low"
+  },
+  "lalitpur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "rajgarh": {
+    "state": "Madhya Pradesh",
+    "fire_count": 10,
+    "risk": "Low"
+  },
+  "panch mahals": {
+    "state": "Gujarat",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "ludhiana": {
+    "state": "Punjab",
+    "fire_count": 15,
+    "risk": "Low"
+  },
+  "kinnaur": {
+    "state": "Himachal Pradesh",
+    "fire_count": 27,
+    "risk": "Low"
+  },
+  "rampur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 32,
+    "risk": "Low"
+  },
+  "sangrur": {
+    "state": "Punjab",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "west imphal": {
+    "state": "Manipur",
+    "fire_count": 37,
+    "risk": "Low"
+  },
+  "mahendragarh": {
+    "state": "Haryana",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "sant ravi das nagar": {
+    "state": "Uttar Pradesh",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "sagar": {
+    "state": "Madhya Pradesh",
+    "fire_count": 27,
+    "risk": "Low"
+  },
+  "salem": {
+    "state": "Tamil Nadu",
+    "fire_count": 24,
+    "risk": "Low"
+  },
+  "kishanganj": {
+    "state": "Bihar",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "kollam": {
+    "state": "Kerala",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "pudukkottai": {
+    "state": "Tamil Nadu",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "sivaganga": {
+    "state": "Tamil Nadu",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "ramanathapuram": {
+    "state": "Tamil Nadu",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "warangal": {
+    "state": "Andhra Pradesh",
+    "fire_count": 363,
+    "risk": "High"
+  },
+  "namakkal": {
+    "state": "Tamil Nadu",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "villupuram": {
+    "state": "Tamil Nadu",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "dharmapuri": {
+    "state": "Tamil Nadu",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "kancheepuram": {
+    "state": "Tamil Nadu",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "hassan": {
+    "state": "Karnataka",
+    "fire_count": 19,
+    "risk": "Low"
+  },
+  "udupi": {
+    "state": "Karnataka",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "sabar kantha": {
+    "state": "Gujarat",
+    "fire_count": 33,
+    "risk": "Low"
+  },
+  "garhchiroli": {
+    "state": "Maharashtra",
+    "fire_count": 35,
+    "risk": "Low"
+  },
+  "adilabad": {
+    "state": "Andhra Pradesh",
+    "fire_count": 141,
+    "risk": "Medium"
+  },
+  "koraput": {
+    "state": "Orissa",
+    "fire_count": 44,
+    "risk": "Low"
+  },
+  "kheda": {
+    "state": "Gujarat",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "porbandar": {
+    "state": "Gujarat",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "narmada": {
+    "state": "Gujarat",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "amravati": {
+    "state": "Maharashtra",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "burhanpur": {
+    "state": "Madhya Pradesh",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "east nimar": {
+    "state": "Madhya Pradesh",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "uttarkashi": {
+    "state": "Uttaranchal",
+    "fire_count": 245,
+    "risk": "High"
+  },
+  "tehri garhwal": {
+    "state": "Uttaranchal",
+    "fire_count": 110,
+    "risk": "Medium"
+  },
+  "almora": {
+    "state": "Uttaranchal",
+    "fire_count": 77,
+    "risk": "Medium"
+  },
+  "bhiwani": {
+    "state": "Haryana",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "jyotiba phule nagar": {
+    "state": "Uttar Pradesh",
+    "fire_count": 20,
+    "risk": "Low"
+  },
+  "bulandshahr": {
+    "state": "Uttar Pradesh",
+    "fire_count": 77,
+    "risk": "Medium"
+  },
+  "gurgaon": {
+    "state": "Haryana",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "jhunjhunun": {
+    "state": "Rajasthan",
+    "fire_count": 10,
+    "risk": "Low"
+  },
+  "barmer": {
+    "state": "Rajasthan",
+    "fire_count": 44,
+    "risk": "Low"
+  },
+  "morena": {
+    "state": "Madhya Pradesh",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "jalor": {
+    "state": "Rajasthan",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "udhampur": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "srinagar": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "east kameng": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "solan": {
+    "state": "Himachal Pradesh",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "indore": {
+    "state": "Madhya Pradesh",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "delhi": {
+    "state": "Delhi",
+    "fire_count": 28,
+    "risk": "Low"
+  },
+  "neemuch": {
+    "state": "Madhya Pradesh",
+    "fire_count": 15,
+    "risk": "Low"
+  },
+  "banas kantha": {
+    "state": "Gujarat",
+    "fire_count": 25,
+    "risk": "Low"
+  },
+  "wardha": {
+    "state": "Maharashtra",
+    "fire_count": 72,
+    "risk": "Medium"
+  },
+  "vizianagaram": {
+    "state": "Andhra Pradesh",
+    "fire_count": 35,
+    "risk": "Low"
+  },
+  "dantewada": {
+    "state": "Chhattisgarh",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "nuapada": {
+    "state": "Orissa",
+    "fire_count": 74,
+    "risk": "Medium"
+  },
+  "chikmagalur": {
+    "state": "Karnataka",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "basti": {
+    "state": "Uttar Pradesh",
+    "fire_count": 40,
+    "risk": "Low"
+  },
+  "purba champaran": {
+    "state": "Bihar",
+    "fire_count": 42,
+    "risk": "Low"
+  },
+  "bhabua": {
+    "state": "Bihar",
+    "fire_count": 961,
+    "risk": "High"
+  },
+  "mirzapur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 55,
+    "risk": "Medium"
+  },
+  "jamui": {
+    "state": "Bihar",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "naini tal": {
+    "state": "Uttaranchal",
+    "fire_count": 18,
+    "risk": "Low"
+  },
+  "kangra": {
+    "state": "Himachal Pradesh",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "una": {
+    "state": "Himachal Pradesh",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "pauri garhwal": {
+    "state": "Uttaranchal",
+    "fire_count": 130,
+    "risk": "Medium"
+  },
+  "saharanpur": {
+    "state": "Uttar Pradesh",
+    "fire_count": 68,
+    "risk": "Medium"
+  },
+  "karnal": {
+    "state": "Haryana",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "pithoragarh": {
+    "state": "Uttaranchal",
+    "fire_count": 79,
+    "risk": "Medium"
+  },
+  "ganjam": {
+    "state": "Orissa",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "boudh": {
+    "state": "Orissa",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "tikamgarh": {
+    "state": "Madhya Pradesh",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "darbhanga": {
+    "state": "Bihar",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "dakshin dinajpur": {
+    "state": "West Bengal",
+    "fire_count": 35,
+    "risk": "Low"
+  },
+  "lakhisarai": {
+    "state": "Bihar",
+    "fire_count": 53,
+    "risk": "Medium"
+  },
+  "yamuna nagar": {
+    "state": "Haryana",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "alwar": {
+    "state": "Rajasthan",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "north goa": {
+    "state": "Goa",
+    "fire_count": 15,
+    "risk": "Low"
+  },
+  "chamoli": {
+    "state": "Uttaranchal",
+    "fire_count": 47,
+    "risk": "Low"
+  },
+  "giridih": {
+    "state": "Jharkhand",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "kochbihar": {
+    "state": "West Bengal",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "nalbari": {
+    "state": "Assam",
+    "fire_count": 13,
+    "risk": "Low"
+  },
+  "pakur": {
+    "state": "Jharkhand",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "chandel": {
+    "state": "Manipur",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "khagaria": {
+    "state": "Bihar",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "dhuburi": {
+    "state": "Assam",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "munger": {
+    "state": "Bihar",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "maldah": {
+    "state": "West Bengal",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "serchhip": {
+    "state": "Mizoram",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "bagdam": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "hoshiarpur": {
+    "state": "Punjab",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "sonepur": {
+    "state": "Orissa",
+    "fire_count": 33,
+    "risk": "Low"
+  },
+  "north 24 parganas": {
+    "state": "West Bengal",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "bongaigaon": {
+    "state": "Assam",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "aizawl": {
+    "state": "Mizoram",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "north cachar hills": {
+    "state": "Assam",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "sahibganj": {
+    "state": "Jharkhand",
+    "fire_count": 19,
+    "risk": "Low"
+  },
+  "marigaon": {
+    "state": "Assam",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "doda": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 25,
+    "risk": "Low"
+  },
+  "erode": {
+    "state": "Tamil Nadu",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "mandya": {
+    "state": "Karnataka",
+    "fire_count": 51,
+    "risk": "Medium"
+  },
+  "anuppur": {
+    "state": "Madhya Pradesh",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "bageshwar": {
+    "state": "Uttaranchal",
+    "fire_count": 37,
+    "risk": "Low"
+  },
+  "dausa": {
+    "state": "Rajasthan",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "sikar": {
+    "state": "Rajasthan",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "churu": {
+    "state": "Rajasthan",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "dakshin kannad": {
+    "state": "Karnataka",
+    "fire_count": 14,
+    "risk": "Low"
+  },
+  "bangalore rural": {
+    "state": "Karnataka",
+    "fire_count": 74,
+    "risk": "Medium"
+  },
+  "mysore": {
+    "state": "Karnataka",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "jhalawar": {
+    "state": "Rajasthan",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "rudra prayag": {
+    "state": "Uttaranchal",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "rayagada": {
+    "state": "Orissa",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "thiruvallur": {
+    "state": "Tamil Nadu",
+    "fire_count": 14,
+    "risk": "Low"
+  },
+  "bangalore urban": {
+    "state": "Karnataka",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "jalpaiguri": {
+    "state": "West Bengal",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "akola": {
+    "state": "Maharashtra",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "tonk": {
+    "state": "Rajasthan",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "shajapur": {
+    "state": "Madhya Pradesh",
+    "fire_count": 15,
+    "risk": "Low"
+  },
+  "ratlam": {
+    "state": "Madhya Pradesh",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "ujjain": {
+    "state": "Madhya Pradesh",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "ambala": {
+    "state": "Haryana",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "hathras": {
+    "state": "Uttar Pradesh",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "kullu": {
+    "state": "Himachal Pradesh",
+    "fire_count": 34,
+    "risk": "Low"
+  },
+  "rupnagar": {
+    "state": "Punjab",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "punch": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 50,
+    "risk": "Medium"
+  },
+  "begusarai": {
+    "state": "Bihar",
+    "fire_count": 25,
+    "risk": "Low"
+  },
+  "palakkad": {
+    "state": "Kerala",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "bhilwara": {
+    "state": "Rajasthan",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "mahoba": {
+    "state": "Uttar Pradesh",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "samastipur": {
+    "state": "Bihar",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "ukhrul": {
+    "state": "Manipur",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "chamba": {
+    "state": "Himachal Pradesh",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "vaishali": {
+    "state": "Bihar",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "east khasi hills": {
+    "state": "Meghalaya",
+    "fire_count": 16,
+    "risk": "Low"
+  },
+  "tuensang": {
+    "state": "Nagaland",
+    "fire_count": 32,
+    "risk": "Low"
+  },
+  "mathura": {
+    "state": "Uttar Pradesh",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "anantnag (kashmir south)": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "navsari": {
+    "state": "Gujarat",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "saharsa": {
+    "state": "Bihar",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "rewari": {
+    "state": "Haryana",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "alappuzha": {
+    "state": "Kerala",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "wayanad": {
+    "state": "Kerala",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "gandhinagar": {
+    "state": "Gujarat",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "mandsaur": {
+    "state": "Madhya Pradesh",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "chhatarpur": {
+    "state": "Madhya Pradesh",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "uttar kannand": {
+    "state": "Karnataka",
+    "fire_count": 10,
+    "risk": "Low"
+  },
+  "jagatsinghpur": {
+    "state": "Orissa",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "mayurbhanj": {
+    "state": "Orissa",
+    "fire_count": 20,
+    "risk": "Low"
+  },
+  "upper subansiri": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "madhubani": {
+    "state": "Bihar",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "dhaulpur": {
+    "state": "Rajasthan",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "garhwa": {
+    "state": "Jharkhand",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "dahod": {
+    "state": "Gujarat",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "puri": {
+    "state": "Orissa",
+    "fire_count": 14,
+    "risk": "Low"
+  },
+  "west kameng": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "zunheboto": {
+    "state": "Nagaland",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "khordha": {
+    "state": "Orissa",
+    "fire_count": 11,
+    "risk": "Low"
+  },
+  "nayagarh": {
+    "state": "Orissa",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "upper dibang valley": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 23,
+    "risk": "Low"
+  },
+  "bhadrak": {
+    "state": "Orissa",
+    "fire_count": 34,
+    "risk": "Low"
+  },
+  "champawat": {
+    "state": "Uttaranchal",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "thoothukudi": {
+    "state": "Tamil Nadu",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "kolar": {
+    "state": "Karnataka",
+    "fire_count": 17,
+    "risk": "Low"
+  },
+  "the dangs": {
+    "state": "Gujarat",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "panchkula": {
+    "state": "Haryana",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "rajauri": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 10,
+    "risk": "Low"
+  },
+  "shimoga": {
+    "state": "Karnataka",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "karur": {
+    "state": "Tamil Nadu",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "tiruvannamalai": {
+    "state": "Tamil Nadu",
+    "fire_count": 6,
+    "risk": "Low"
+  },
+  "vellore": {
+    "state": "Tamil Nadu",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "gajapati": {
+    "state": "Orissa",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "sheohar": {
+    "state": "Bihar",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "pattanamtitta": {
+    "state": "Kerala",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "ariyalur": {
+    "state": "Tamil Nadu",
+    "fire_count": 7,
+    "risk": "Low"
+  },
+  "perambalur": {
+    "state": "Tamil Nadu",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "chittoor": {
+    "state": "Andhra Pradesh",
+    "fire_count": 10,
+    "risk": "Low"
+  },
+  "kandhamal": {
+    "state": "Orissa",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "koderma": {
+    "state": "Jharkhand",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "jashpur": {
+    "state": "Chhattisgarh",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "tawang": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 5,
+    "risk": "Low"
+  },
+  "kurung kumey": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "upper siang": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "mandi": {
+    "state": "Himachal Pradesh",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "ernakulam": {
+    "state": "Kerala",
+    "fire_count": 9,
+    "risk": "Low"
+  },
+  "karimganj": {
+    "state": "Assam",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "south tripura": {
+    "state": "Tripura",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "kottayam": {
+    "state": "Kerala",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "washim": {
+    "state": "Maharashtra",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "kathua": {
+    "state": "Jammu and Kashmir",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "kohima": {
+    "state": "Nagaland",
+    "fire_count": 10,
+    "risk": "Low"
+  },
+  "chamrajnagar": {
+    "state": "Karnataka",
+    "fire_count": 12,
+    "risk": "Low"
+  },
+  "kasaragod": {
+    "state": "Kerala",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "dadra and nagar haveli": {
+    "state": "Dadra and Nagar Haveli",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "rajsamand": {
+    "state": "Rajasthan",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "sibsagar": {
+    "state": "Assam",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "tirap": {
+    "state": "Arunachal Pradesh",
+    "fire_count": 22,
+    "risk": "Low"
+  },
+  "virudhunagar": {
+    "state": "Tamil Nadu",
+    "fire_count": 4,
+    "risk": "Low"
+  },
+  "dindigul": {
+    "state": "Tamil Nadu",
+    "fire_count": 3,
+    "risk": "Low"
+  },
+  "tiruchchirappalli": {
+    "state": "Tamil Nadu",
+    "fire_count": 2,
+    "risk": "Low"
+  },
+  "kannur": {
+    "state": "Kerala",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "kodagu": {
+    "state": "Karnataka",
+    "fire_count": 8,
+    "risk": "Low"
+  },
+  "deogarh": {
+    "state": "Orissa",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "darjiling": {
+    "state": "West Bengal",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "supaul": {
+    "state": "Bihar",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "dhalai": {
+    "state": "Tripura",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "mokokchung": {
+    "state": "Nagaland",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "malappuram": {
+    "state": "Kerala",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "ajmer": {
+    "state": "Rajasthan",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "dungarpur": {
+    "state": "Rajasthan",
+    "fire_count": 1,
+    "risk": "Low"
+  },
+  "west sikkim": {
+    "state": "Sikkim",
+    "fire_count": 6,
+    "risk": "Low"
+  }
+}
