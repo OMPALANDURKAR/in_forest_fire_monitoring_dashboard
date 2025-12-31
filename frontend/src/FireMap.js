@@ -1,209 +1,262 @@
-import { MapContainer, TileLayer, CircleMarker, Popup, GeoJSON } from "react-leaflet";
-import { useEffect, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  CircleMarker,
+  Popup,
+  GeoJSON,
+  useMap
+} from "react-leaflet";
+import { useEffect, useMemo, useState } from "react";
+import "leaflet/dist/leaflet.css";
+import "./styles/firemap.css";
+import useDebounce from "./hooks/useDebounce";
 
 /* ===============================
-   DISTRICT NAME NORMALIZER
+   UTILS
 ================================ */
-const normalizeDistrict = (name) => {
-  if (!name) return null;
+const normalizeDistrict = (name) =>
+  name ? name.toLowerCase().replace(" district", "").trim() : null;
 
-  return name
-    .toLowerCase()
-    .replace(" district", "")
-    .trim();
+const getDistrictName = (p) =>
+  p.DISTRICT || p.district || p.NAME_3 || p.NAME_2 || p.dtname || null;
+
+/* ===============================
+   DISTRICT SEARCH HANDLER
+================================ */
+const DistrictSearchHandler = ({
+  districtGeo,
+  districtRisk,
+  searchDistrict,
+  setSelectedDistrict
+}) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!searchDistrict || !districtGeo) return;
+
+    const target = searchDistrict.toLowerCase().trim();
+
+    for (const feature of districtGeo.features) {
+      const raw = getDistrictName(feature.properties);
+      if (!raw) continue;
+
+      if (normalizeDistrict(raw) === target) {
+        const bounds = feature.geometry.coordinates[0].map(
+          ([lng, lat]) => [lat, lng]
+        );
+
+        map.fitBounds(bounds, { padding: [40, 40] });
+
+        const info = districtRisk[target];
+        if (info) {
+          setSelectedDistrict({
+            district: raw,
+            state: info.state,
+            fireCount: info.fire_count,
+            risk: info.risk
+          });
+        }
+        break;
+      }
+    }
+  }, [searchDistrict, districtGeo, districtRisk, map, setSelectedDistrict]);
+
+  return null;
 };
 
 /* ===============================
-   SAFELY EXTRACT DISTRICT NAME
-   (THIS WAS THE MAIN ISSUE)
+   MAIN MAP COMPONENT
 ================================ */
-const getDistrictName = (properties) => {
-  return (
-    properties.DISTRICT ||
-    properties.district ||
-    properties.NAME_3 ||
-    properties.NAME_2 ||
-    properties.dtname ||
-    null
-  );
-};
-
-const FireMap = () => {
-
-  /* ===============================
-     STATE VARIABLES
-  ================================ */
+const FireMap = ({
+  setSelectedDistrict,
+  searchDistrict,
+  riskFilter,
+  dateFrom,
+  dateTo
+}) => {
   const [fires, setFires] = useState([]);
-  const [districtRisk, setDistrictRisk] = useState({});
   const [districtGeo, setDistrictGeo] = useState(null);
+  const [districtRisk, setDistrictRisk] = useState({});
+  const [basemap, setBasemap] = useState("satellite");
 
-  const [summary, setSummary] = useState({
-    High: 0,
-    Medium: 0,
-    Low: 0
-  });
+  const debouncedSearch = useDebounce(searchDistrict, 500);
 
   /* ===============================
-     FETCH FIRE POINTS
+     TILE LAYERS
+  ================================ */
+  const tileLayers = useMemo(
+    () => ({
+      street: {
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution: "© OpenStreetMap"
+      },
+      satellite: {
+        url:
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        attribution: "© Esri"
+      }
+    }),
+    []
+  );
+
+  /* ===============================
+     FETCH DATA
   ================================ */
   useEffect(() => {
     fetch("http://localhost:5000/api/fires")
       .then(res => res.json())
-      .then(data => setFires(data))
-      .catch(err => console.error("Fire fetch error:", err));
-  }, []);
-
-  /* ===============================
-     FETCH DISTRICT DATA
-  ================================ */
-  useEffect(() => {
-    fetch("http://localhost:5000/api/district-risk")
-      .then(res => res.json())
-      .then(data => setDistrictRisk(data));
+      .then(setFires)
+      .catch(console.error);
 
     fetch("http://localhost:5000/api/districts")
       .then(res => res.json())
-      .then(data => setDistrictGeo(data));
+      .then(setDistrictGeo)
+      .catch(console.error);
+
+    fetch("http://localhost:5000/api/district-risk")
+      .then(res => res.json())
+      .then(setDistrictRisk)
+      .catch(console.error);
   }, []);
 
   /* ===============================
-     COMPUTE RISK SUMMARY
+     FILTERS
   ================================ */
-  useEffect(() => {
-    const counts = { High: 0, Medium: 0, Low: 0 };
-
-    Object.values(districtRisk).forEach(d => {
-      if (d.risk === "High") counts.High++;
-      else if (d.risk === "Medium") counts.Medium++;
-      else if (d.risk === "Low") counts.Low++;
+  const riskFilteredFires = useMemo(() => {
+    return fires.filter(f => {
+      if (f.brightness > 350 && !riskFilter.high) return false;
+      if (f.brightness >= 300 && f.brightness <= 350 && !riskFilter.medium)
+        return false;
+      if (f.brightness < 300 && !riskFilter.low) return false;
+      return true;
     });
+  }, [fires, riskFilter]);
 
-    setSummary(counts);
-  }, [districtRisk]);
+  const finalFires = useMemo(() => {
+    if (!dateFrom || !dateTo) return riskFilteredFires;
 
-  /* ===============================
-     DISTRICT STYLE FUNCTION
-  ================================ */
-  const getDistrictStyle = (feature) => {
-    const rawName = getDistrictName(feature.properties);
-    const districtKey = normalizeDistrict(rawName);
-    const info = districtRisk[districtKey];
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
 
-    if (!info) {
-      return {
-        fillOpacity: 0,
-        weight: 0
-      };
-    }
-
-    let color = "green";
-    if (info.risk === "High") color = "red";
-    else if (info.risk === "Medium") color = "orange";
-
-    return {
-      fillColor: color,
-      fillOpacity: 0.6,
-      color: "#333",
-      weight: 1
-    };
-  };
+    return riskFilteredFires.filter(f => {
+      const d = new Date(f.acq_date);
+      return d >= from && d <= to;
+    });
+  }, [riskFilteredFires, dateFrom, dateTo]);
 
   /* ===============================
-     FIRE POINT COLOR
+     COLOR LOGIC (GIS PALETTE)
   ================================ */
-  const getFireColor = (brightness) => {
-    if (brightness > 350) return "red";
-    if (brightness >= 300) return "orange";
-    return "green";
-  };
+  const fireColor = (b) =>
+  b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
 
-  /* ===============================
-     RENDER
-  ================================ */
+
   return (
-    <>
-      {/* 🔥 FIRE RISK SUMMARY */}
-      <div
-        style={{
-          position: "absolute",
-          top: 20,
-          right: 20,
-          background: "white",
-          padding: "12px 16px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
-          zIndex: 1000
-        }}
-      >
-        <h4>Fire Risk Summary</h4>
-        <p style={{ color: "red" }}>High Risk: {summary.High}</p>
-        <p style={{ color: "orange" }}>Medium Risk: {summary.Medium}</p>
-        <p style={{ color: "green" }}>Low Risk: {summary.Low}</p>
+    <div className="map-container">
+
+      {/* BASEMAP TOGGLE */}
+      <div className="basemap-toggle">
+        <button
+          className={basemap === "street" ? "active" : ""}
+          onClick={() => setBasemap("street")}
+        >
+          Street
+        </button>
+        <button
+          className={basemap === "satellite" ? "active" : ""}
+          onClick={() => setBasemap("satellite")}
+        >
+          Satellite
+        </button>
       </div>
 
       <MapContainer
-        center={[22.5937, 78.9629]}
+        center={[22.6, 79]}
         zoom={5}
-        style={{ height: "100vh", width: "100%" }}
+        zoomControl={false}
+        preferCanvas={true}
       >
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url={tileLayers[basemap].url}
+          attribution={tileLayers[basemap].attribution}
         />
 
-        {/* 🟢🟡🔴 DISTRICT LAYER */}
+        {/* DISTRICT BOUNDARIES */}
         {districtGeo && (
           <GeoJSON
             data={districtGeo}
-            style={getDistrictStyle}
-            onEachFeature={(feature, layer) => {
-              const rawName = getDistrictName(feature.properties);
-              const districtKey = normalizeDistrict(rawName);
-              const info = districtRisk[districtKey];
-
-              if (info) {
-                layer.bindPopup(`
-                  <b>District:</b> ${rawName}<br/>
-                  <b>State:</b> ${info.state}<br/>
-                  <b>Fire Count:</b> ${info.fire_count}<br/>
-                  <b>Risk:</b> ${info.risk}
-                `);
-              }
+            style={{
+              color: "#64748b",
+              weight: 0.6,
+              fillOpacity: 0
             }}
           />
         )}
 
-        {/* 🔥 FIRE POINT MARKERS */}
-        {fires.map((fire, index) => {
-          const lat = Number(fire.latitude);
-          const lon = Number(fire.longitude);
-          const brightness = Number(fire.brightness);
-
+        {/* FIRE POINTS */}
+        {finalFires.map((f, idx) => {
+          const lat = Number(f.latitude);
+          const lon = Number(f.longitude);
           if (isNaN(lat) || isNaN(lon)) return null;
 
           return (
             <CircleMarker
-              key={index}
+              key={idx}
               center={[lat, lon]}
-              radius={5}
+              radius={f.brightness > 350 ? 4 : 3}
+              interactive={true}
+              bubblingMouseEvents={true}
               pathOptions={{
-                color: getFireColor(brightness),
-                fillColor: getFireColor(brightness),
-                fillOpacity: 0.7
+                color: fireColor(f.brightness),
+                fillColor: fireColor(f.brightness),
+                fillOpacity: 0.7,
+                weight: 0
               }}
             >
               <Popup>
-                <b>Date:</b> {fire.acq_date}<br />
-                <b>Brightness:</b> {brightness}<br />
-                <b>Confidence:</b> {fire.confidence}<br />
-                <b>District:</b> {fire.district}<br />
-                <b>State:</b> {fire.state}
+                <div style={{ fontSize: "13px", lineHeight: "1.5" }}>
+                  <div>
+                    <strong>Fire Risk:</strong>{" "}
+                    {f.brightness > 350
+                      ? "High"
+                      : f.brightness >= 300
+                      ? "Medium"
+                      : "Low"}
+                  </div>
+                  <div>
+                    <strong>State:</strong> {f.state || "N/A"}
+                  </div>
+                  <div>
+                    <strong>District:</strong> {f.district || "N/A"}
+                  </div>
+                  <div>
+                    <strong>Date:</strong> {f.acq_date || "N/A"}
+                  </div>
+                </div>
               </Popup>
             </CircleMarker>
           );
         })}
+
+        {/* SEARCH HANDLER */}
+        {districtGeo && (
+          <DistrictSearchHandler
+            districtGeo={districtGeo}
+            districtRisk={districtRisk}
+            searchDistrict={debouncedSearch}
+            setSelectedDistrict={setSelectedDistrict}
+          />
+        )}
       </MapContainer>
-    </>
+
+      {/* LEGEND */}
+      <div className="legend">
+        <div><span className="dot red" /> High</div>
+        <div><span className="dot orange" /> Medium</div>
+        <div><span className="dot green" /> Low</div>
+      </div>
+
+    </div>
   );
 };
 
