@@ -1,29 +1,29 @@
 const SidebarFilters = ({
   searchDistrict,
   setSearchDistrict,
-  riskFilter,
+  riskFilter = { high: true, medium: true, low: true },
   setRiskFilter,
   dateFrom,
   setDateFrom,
   dateTo,
   setDateTo
 }) => {
-
   return (
     <aside className="sidebar">
 
       {/* =========================
-         DISTRICT SEARCH
+         SEARCH
       ========================= */}
       <h3>Search & Filters</h3>
 
       <label>Search District</label>
       <input
-  type="text"
-  value={searchDistrict}
-  onChange={(e) => setSearchDistrict(e.target.value)}
-  placeholder="Search district"
-/>
+        type="text"
+        value={searchDistrict}
+        onChange={(e) => setSearchDistrict(e.target.value)}
+        placeholder="Type district name"
+      />
+
       {/* =========================
          RISK FILTERS
       ========================= */}
@@ -33,36 +33,36 @@ const SidebarFilters = ({
 
         <div className="risk-item">
           <input
-  type="checkbox"
-  checked={riskFilter.high}
-  onChange={() =>
-    setRiskFilter(prev => ({ ...prev, high: !prev.high }))
-  }
-/>
+            type="checkbox"
+            checked={riskFilter.high}
+            onChange={() =>
+              setRiskFilter(prev => ({ ...prev, high: !prev.high }))
+            }
+          />
           <span className="risk-dot risk-high" />
           <span>High</span>
         </div>
 
         <div className="risk-item">
           <input
-  type="checkbox"
-  checked={riskFilter.medium}
-  onChange={() =>
-    setRiskFilter(prev => ({ ...prev, medium: !prev.medium }))
-  }
-/>
+            type="checkbox"
+            checked={riskFilter.medium}
+            onChange={() =>
+              setRiskFilter(prev => ({ ...prev, medium: !prev.medium }))
+            }
+          />
           <span className="risk-dot risk-medium" />
           <span>Medium</span>
         </div>
 
         <div className="risk-item">
           <input
-  type="checkbox"
-  checked={riskFilter.low}
-  onChange={() =>
-    setRiskFilter(prev => ({ ...prev, low: !prev.low }))
-  }
-/>
+            type="checkbox"
+            checked={riskFilter.low}
+            onChange={() =>
+              setRiskFilter(prev => ({ ...prev, low: !prev.low }))
+            }
+          />
           <span className="risk-dot risk-low" />
           <span>Low</span>
         </div>
@@ -81,15 +81,11 @@ const SidebarFilters = ({
 
       <label>Date To</label>
       <input
-  type="date"
-  value={dateFrom}
-  onChange={(e) => setDateFrom(e.target.value)}
-/>
-<input
-  type="date"
-  value={dateTo}
-  onChange={(e) => setDateTo(e.target.value)}
-/>
+        type="date"
+        value={dateTo}
+        onChange={(e) => setDateTo(e.target.value)}
+      />
+
     </aside>
   );
 };

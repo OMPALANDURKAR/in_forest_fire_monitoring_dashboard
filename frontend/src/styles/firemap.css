@@ -2,15 +2,15 @@
    GLOBAL COLOR VARIABLES
 ========================= */
 :root {
-  --bg-panel: #ffffff;
-  --bg-map: #ffffff;
+  --bg-panel: #4dec48;
+  --bg-map: #45f448;
 
-  --border-light: #e2e8f0;
+  --border-light: #e2f0e3;
 
   --text-primary: #1e293b;
   --text-secondary: #64748b;
 
-  --accent-primary: #f97316;
+  --accent-primary: #fe6a00;
 
   --risk-high: #dc2626;
   --risk-medium: #f59e0b;

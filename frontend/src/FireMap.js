@@ -21,6 +21,15 @@ const getDistrictName = (p) =>
   p.DISTRICT || p.district || p.NAME_3 || p.NAME_2 || p.dtname || null;
 
 /* ===============================
+   FIRE RISK LOGIC (REUSABLE)
+================================ */
+const getFireRisk = (brightness) => {
+  if (brightness > 350) return "High";
+  if (brightness >= 300) return "Medium";
+  return "Low";
+};
+
+/* ===============================
    DISTRICT SEARCH HANDLER
 ================================ */
 const DistrictSearchHandler = ({
@@ -79,6 +88,9 @@ const FireMap = ({
   const [districtRisk, setDistrictRisk] = useState({});
   const [basemap, setBasemap] = useState("satellite");
 
+  // OPTION A
+  const [dataMode, setDataMode] = useState("historical");
+
   const debouncedSearch = useDebounce(searchDistrict, 500);
 
   /* ===============================
@@ -100,23 +112,31 @@ const FireMap = ({
   );
 
   /* ===============================
-     FETCH DATA
+     FETCH FIRE DATA (OPTION A)
   ================================ */
   useEffect(() => {
-    fetch("http://localhost:5000/api/fires")
+    const url =
+      dataMode === "historical"
+        ? "http://localhost:5000/api/fires"
+        : "http://localhost:5000/api/fires-realtime";
+
+    fetch(url)
       .then(res => res.json())
       .then(setFires)
       .catch(console.error);
+  }, [dataMode]);
 
+  /* ===============================
+     FETCH STATIC DATA
+  ================================ */
+  useEffect(() => {
     fetch("http://localhost:5000/api/districts")
       .then(res => res.json())
-      .then(setDistrictGeo)
-      .catch(console.error);
+      .then(setDistrictGeo);
 
     fetch("http://localhost:5000/api/district-risk")
       .then(res => res.json())
-      .then(setDistrictRisk)
-      .catch(console.error);
+      .then(setDistrictRisk);
   }, []);
 
   /* ===============================
@@ -145,14 +165,29 @@ const FireMap = ({
   }, [riskFilteredFires, dateFrom, dateTo]);
 
   /* ===============================
-     COLOR LOGIC (GIS PALETTE)
+     COLOR LOGIC
   ================================ */
   const fireColor = (b) =>
-  b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
-
+    b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
 
   return (
     <div className="map-container">
+
+      {/* DATA MODE TOGGLE */}
+      <div className="data-toggle">
+        <button
+          className={dataMode === "historical" ? "active" : ""}
+          onClick={() => setDataMode("historical")}
+        >
+          Historical
+        </button>
+        <button
+          className={dataMode === "realtime" ? "active" : ""}
+          onClick={() => setDataMode("realtime")}
+        >
+          FIRMS
+        </button>
+      </div>
 
       {/* BASEMAP TOGGLE */}
       <div className="basemap-toggle">
@@ -173,7 +208,6 @@ const FireMap = ({
       <MapContainer
         center={[22.6, 79]}
         zoom={5}
-        zoomControl={false}
         preferCanvas={true}
       >
         <TileLayer
@@ -190,10 +224,26 @@ const FireMap = ({
               weight: 0.6,
               fillOpacity: 0
             }}
+            onEachFeature={(feature, layer) => {
+              const name = getDistrictName(feature.properties);
+              const key = normalizeDistrict(name);
+              const info = districtRisk[key];
+
+              if (info) {
+                layer.on("click", () => {
+                  setSelectedDistrict({
+                    district: name,
+                    state: info.state,
+                    fireCount: info.fire_count,
+                    risk: info.risk
+                  });
+                });
+              }
+            }}
           />
         )}
 
-        {/* FIRE POINTS */}
+        {/* 🔥 FIRE POINTS (CLICK FEATURE ADDED) */}
         {finalFires.map((f, idx) => {
           const lat = Number(f.latitude);
           const lon = Number(f.longitude);
@@ -204,41 +254,39 @@ const FireMap = ({
               key={idx}
               center={[lat, lon]}
               radius={f.brightness > 350 ? 4 : 3}
-              interactive={true}
-              bubblingMouseEvents={true}
               pathOptions={{
                 color: fireColor(f.brightness),
                 fillColor: fireColor(f.brightness),
                 fillOpacity: 0.7,
                 weight: 0
               }}
+              eventHandlers={{
+                click: () => {
+                  setSelectedDistrict({
+                    district: f.district || "N/A",
+                    state: f.state || "N/A",
+                    risk: getFireRisk(f.brightness),
+                    fireCount: 1,
+                    date: f.acq_date || "N/A",
+                    time: f.acq_time || "N/A"
+                  });
+                }
+              }}
             >
               <Popup>
                 <div style={{ fontSize: "13px", lineHeight: "1.5" }}>
-                  <div>
-                    <strong>Fire Risk:</strong>{" "}
-                    {f.brightness > 350
-                      ? "High"
-                      : f.brightness >= 300
-                      ? "Medium"
-                      : "Low"}
-                  </div>
-                  <div>
-                    <strong>State:</strong> {f.state || "N/A"}
-                  </div>
-                  <div>
-                    <strong>District:</strong> {f.district || "N/A"}
-                  </div>
-                  <div>
-                    <strong>Date:</strong> {f.acq_date || "N/A"}
-                  </div>
+                  <div><strong>District:</strong> {f.district || "N/A"}</div>
+                  <div><strong>State:</strong> {f.state || "N/A"}</div>
+                  <div><strong>Fire Risk:</strong> {getFireRisk(f.brightness)}</div>
+                  <div><strong>Date:</strong> {f.acq_date || "N/A"}</div>
+                  <div><strong>Time:</strong> {f.acq_time || "N/A"}</div>
                 </div>
               </Popup>
             </CircleMarker>
           );
         })}
 
-        {/* SEARCH HANDLER */}
+        {/* SEARCH */}
         {districtGeo && (
           <DistrictSearchHandler
             districtGeo={districtGeo}
@@ -255,7 +303,6 @@ const FireMap = ({
         <div><span className="dot orange" /> Medium</div>
         <div><span className="dot green" /> Low</div>
       </div>
-
     </div>
   );
 };
