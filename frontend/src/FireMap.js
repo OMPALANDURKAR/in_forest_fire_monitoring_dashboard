@@ -20,9 +20,6 @@ const normalizeDistrict = (name) =>
 const getDistrictName = (p) =>
   p.DISTRICT || p.district || p.NAME_3 || p.NAME_2 || p.dtname || null;
 
-/* ===============================
-   FIRE RISK LOGIC (REUSABLE)
-================================ */
 const getFireRisk = (brightness) => {
   if (brightness > 350) return "High";
   if (brightness >= 300) return "Medium";
@@ -36,7 +33,7 @@ const DistrictSearchHandler = ({
   districtGeo,
   districtRisk,
   searchDistrict,
-  setSelectedDistrict
+  onDistrictSelect
 }) => {
   const map = useMap();
 
@@ -46,29 +43,37 @@ const DistrictSearchHandler = ({
     const target = searchDistrict.toLowerCase().trim();
 
     for (const feature of districtGeo.features) {
-      const raw = getDistrictName(feature.properties);
-      if (!raw) continue;
+      const rawName = getDistrictName(feature.properties);
+      if (!rawName) continue;
 
-      if (normalizeDistrict(raw) === target) {
-        const bounds = feature.geometry.coordinates[0].map(
-          ([lng, lat]) => [lat, lng]
-        );
+      if (normalizeDistrict(rawName) === target) {
+        const coords = feature.geometry.coordinates[0];
 
+        const bounds = coords.map(([lng, lat]) => [lat, lng]);
         map.fitBounds(bounds, { padding: [40, 40] });
+
+        // centroid for popup (search case)
+        const centroid = bounds.reduce(
+          (acc, cur) => [acc[0] + cur[0], acc[1] + cur[1]],
+          [0, 0]
+        ).map(v => v / bounds.length);
 
         const info = districtRisk[target];
         if (info) {
-          setSelectedDistrict({
-            district: raw,
-            state: info.state,
-            fireCount: info.fire_count,
-            risk: info.risk
-          });
+          onDistrictSelect(
+            {
+              district: rawName,
+              state: info.state,
+              fireCount: info.fire_count,
+              risk: info.risk
+            },
+            centroid
+          );
         }
         break;
       }
     }
-  }, [searchDistrict, districtGeo, districtRisk, map, setSelectedDistrict]);
+  }, [searchDistrict, districtGeo, districtRisk, map, onDistrictSelect]);
 
   return null;
 };
@@ -83,19 +88,19 @@ const FireMap = ({
   dateFrom,
   dateTo
 }) => {
+  /* ---------- STATE ---------- */
   const [fires, setFires] = useState([]);
   const [districtGeo, setDistrictGeo] = useState(null);
   const [districtRisk, setDistrictRisk] = useState({});
   const [basemap, setBasemap] = useState("satellite");
 
-  // OPTION A
-  const [dataMode, setDataMode] = useState("historical");
+  // popup state
+  const [popupDistrict, setPopupDistrict] = useState(null);
+  const [popupPosition, setPopupPosition] = useState(null);
 
   const debouncedSearch = useDebounce(searchDistrict, 500);
 
-  /* ===============================
-     TILE LAYERS
-  ================================ */
+  /* ---------- TILE LAYERS ---------- */
   const tileLayers = useMemo(
     () => ({
       street: {
@@ -111,25 +116,13 @@ const FireMap = ({
     []
   );
 
-  /* ===============================
-     FETCH FIRE DATA (OPTION A)
-  ================================ */
+  /* ---------- FETCH DATA ---------- */
   useEffect(() => {
-    const url =
-      dataMode === "historical"
-        ? "http://localhost:5000/api/fires"
-        : "http://localhost:5000/api/fires-realtime";
-
-    fetch(url)
+    fetch("http://localhost:5000/api/fires")
       .then(res => res.json())
       .then(setFires)
       .catch(console.error);
-  }, [dataMode]);
 
-  /* ===============================
-     FETCH STATIC DATA
-  ================================ */
-  useEffect(() => {
     fetch("http://localhost:5000/api/districts")
       .then(res => res.json())
       .then(setDistrictGeo);
@@ -139,55 +132,31 @@ const FireMap = ({
       .then(setDistrictRisk);
   }, []);
 
-  /* ===============================
-     FILTERS
-  ================================ */
-  const riskFilteredFires = useMemo(() => {
+  /* ---------- FILTER FIRES ---------- */
+  const filteredFires = useMemo(() => {
     return fires.filter(f => {
       if (f.brightness > 350 && !riskFilter.high) return false;
       if (f.brightness >= 300 && f.brightness <= 350 && !riskFilter.medium)
         return false;
       if (f.brightness < 300 && !riskFilter.low) return false;
+
+      if (dateFrom && dateTo) {
+        const d = new Date(f.acq_date);
+        if (d < new Date(dateFrom) || d > new Date(dateTo)) return false;
+      }
+
       return true;
     });
-  }, [fires, riskFilter]);
+  }, [fires, riskFilter, dateFrom, dateTo]);
 
-  const finalFires = useMemo(() => {
-    if (!dateFrom || !dateTo) return riskFilteredFires;
-
-    const from = new Date(dateFrom);
-    const to = new Date(dateTo);
-
-    return riskFilteredFires.filter(f => {
-      const d = new Date(f.acq_date);
-      return d >= from && d <= to;
-    });
-  }, [riskFilteredFires, dateFrom, dateTo]);
+  const fireColor = (b) =>
+    b > 350 ? "#b71c1c" : b >= 300 ? "#f9a825" : "#1b5e20";
 
   /* ===============================
-     COLOR LOGIC
+     RENDER
   ================================ */
-  const fireColor = (b) =>
-    b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
-
   return (
     <div className="map-container">
-
-      {/* DATA MODE TOGGLE */}
-      <div className="data-toggle">
-        <button
-          className={dataMode === "historical" ? "active" : ""}
-          onClick={() => setDataMode("historical")}
-        >
-          Historical
-        </button>
-        <button
-          className={dataMode === "realtime" ? "active" : ""}
-          onClick={() => setDataMode("realtime")}
-        >
-          FIRMS
-        </button>
-      </div>
 
       {/* BASEMAP TOGGLE */}
       <div className="basemap-toggle">
@@ -205,11 +174,7 @@ const FireMap = ({
         </button>
       </div>
 
-      <MapContainer
-        center={[22.6, 79]}
-        zoom={5}
-        preferCanvas={true}
-      >
+      <MapContainer center={[22.6, 79]} zoom={5} preferCanvas>
         <TileLayer
           url={tileLayers[basemap].url}
           attribution={tileLayers[basemap].attribution}
@@ -228,23 +193,47 @@ const FireMap = ({
               const name = getDistrictName(feature.properties);
               const key = normalizeDistrict(name);
               const info = districtRisk[key];
+              if (!info) return;
 
-              if (info) {
-                layer.on("click", () => {
-                  setSelectedDistrict({
-                    district: name,
-                    state: info.state,
-                    fireCount: info.fire_count,
-                    risk: info.risk
-                  });
-                });
-              }
+              layer.on("click", (e) => {
+                const districtData = {
+                  district: name,
+                  state: info.state,
+                  fireCount: info.fire_count,
+                  risk: info.risk
+                };
+
+                setPopupDistrict(districtData);
+                setPopupPosition([e.latlng.lat, e.latlng.lng]);
+                setSelectedDistrict(districtData);
+              });
             }}
           />
         )}
 
-        {/* 🔥 FIRE POINTS (CLICK FEATURE ADDED) */}
-        {finalFires.map((f, idx) => {
+        {/* DISTRICT POPUP */}
+        {popupDistrict && popupPosition && (
+          <Popup
+            position={popupPosition}
+            closeButton
+            eventHandlers={{
+              remove: () => {
+                setPopupDistrict(null);
+                setPopupPosition(null);
+              }
+            }}
+          >
+            <div className="district-popup-content">
+              <h3>{popupDistrict.district}</h3>
+              <div><strong>State:</strong> {popupDistrict.state}</div>
+              <div><strong>Total Fires:</strong> {popupDistrict.fireCount}</div>
+              <div><strong>Risk Level:</strong> {popupDistrict.risk}</div>
+            </div>
+          </Popup>
+        )}
+
+        {/* FIRE POINTS */}
+        {filteredFires.map((f, idx) => {
           const lat = Number(f.latitude);
           const lon = Number(f.longitude);
           if (isNaN(lat) || isNaN(lon)) return null;
@@ -253,46 +242,36 @@ const FireMap = ({
             <CircleMarker
               key={idx}
               center={[lat, lon]}
-              radius={f.brightness > 350 ? 4 : 3}
+              radius={4}
               pathOptions={{
                 color: fireColor(f.brightness),
                 fillColor: fireColor(f.brightness),
                 fillOpacity: 0.7,
                 weight: 0
               }}
-              eventHandlers={{
-                click: () => {
-                  setSelectedDistrict({
-                    district: f.district || "N/A",
-                    state: f.state || "N/A",
-                    risk: getFireRisk(f.brightness),
-                    fireCount: 1,
-                    date: f.acq_date || "N/A",
-                    time: f.acq_time || "N/A"
-                  });
-                }
-              }}
             >
               <Popup>
                 <div style={{ fontSize: "13px", lineHeight: "1.5" }}>
                   <div><strong>District:</strong> {f.district || "N/A"}</div>
-                  <div><strong>State:</strong> {f.state || "N/A"}</div>
-                  <div><strong>Fire Risk:</strong> {getFireRisk(f.brightness)}</div>
-                  <div><strong>Date:</strong> {f.acq_date || "N/A"}</div>
-                  <div><strong>Time:</strong> {f.acq_time || "N/A"}</div>
+                  <div><strong>Risk:</strong> {getFireRisk(f.brightness)}</div>
+                  <div><strong>Date:</strong> {f.acq_date}</div>
                 </div>
               </Popup>
             </CircleMarker>
           );
         })}
 
-        {/* SEARCH */}
+        {/* SEARCH HANDLER */}
         {districtGeo && (
           <DistrictSearchHandler
             districtGeo={districtGeo}
             districtRisk={districtRisk}
             searchDistrict={debouncedSearch}
-            setSelectedDistrict={setSelectedDistrict}
+            onDistrictSelect={(data, pos) => {
+              setPopupDistrict(data);
+              setPopupPosition(pos);
+              setSelectedDistrict(data);
+            }}
           />
         )}
       </MapContainer>

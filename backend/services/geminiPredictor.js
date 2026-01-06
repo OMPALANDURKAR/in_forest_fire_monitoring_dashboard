@@ -1,10 +1,19 @@
+// ================================
+// GEMINI AI PREDICTOR (HISTORICAL)
+// ================================
+
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-async function predictDistrictRisk(districtName, districtData) {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+// ⚠️ Model initialized ONCE (performance + stability)
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
+/**
+ * Predict district-level forest fire risk
+ * Uses ONLY historical data
+ */
+async function predictDistrictRisk(districtName, districtData) {
   const prompt = `
 You are an expert environmental risk analysis AI.
 
@@ -13,18 +22,36 @@ Total Fire Incidents: ${districtData.count}
 Current Risk Level: ${districtData.risk}
 Risk Color Code: ${districtData.color}
 
-Based on the historical fire frequency and severity,
-predict the potential forest fire risk for this district
-in the near future.
+Analyze historical fire patterns and predict
+near-future forest fire risk.
 
-Respond strictly in this format:
-Predicted Risk: <Low | Medium | High>
-Reason: <2–3 lines explanation>
-Alert: <Yes | No>
+Respond ONLY in valid JSON format:
+{
+  "predictedRisk": "Low | Medium | High",
+  "trend": "Increasing | Stable | Decreasing",
+  "alert": true or false,
+  "explanation": "short explanation (2-3 lines)"
+}
+
+Do not include any text outside JSON.
 `;
 
   const result = await model.generateContent(prompt);
-  return result.response.text();
+  const rawText = result.response.text();
+
+  try {
+    return JSON.parse(rawText);
+  } catch (error) {
+    console.error("❌ Gemini JSON Parse Failed:", rawText);
+
+    // 🛡️ Safe fallback (prevents frontend crash)
+    return {
+      predictedRisk: districtData.risk,
+      trend: "Stable",
+      alert: false,
+      explanation: "AI response could not be parsed. Showing current risk."
+    };
+  }
 }
 
 module.exports = { predictDistrictRisk };

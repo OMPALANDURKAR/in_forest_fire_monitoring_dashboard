@@ -8,7 +8,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 
-// Gemini AI
+// Gemini AI (ONLY for popup explanation)
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // ================================
@@ -21,11 +21,24 @@ app.use(cors());
 app.use(express.json());
 
 // ================================
-// LOAD DATA (ONCE – AT STARTUP)
+// LOAD DATA (ONCE AT STARTUP)
 // ================================
+
+// 🔹 HISTORICAL FIRE DATA (mapped to districts)
 const fireData = require("./data/fires_with_location.json");
+
+// 🔹 HISTORICAL DISTRICT RISK SUMMARY
 const districtRisk = require("./data/district_risk.json");
 
+// 🔹 REAL-TIME FIRMS DATA (district not guaranteed)
+let realtimeFires = [];
+try {
+  realtimeFires = require("./data/fires_realtime.json");
+} catch {
+  realtimeFires = [];
+}
+
+// 🔹 DISTRICT BOUNDARIES
 const districtsGeoJSON = JSON.parse(
   fs.readFileSync(
     path.join(__dirname, "data", "india_districts.geojson"),
@@ -34,15 +47,15 @@ const districtsGeoJSON = JSON.parse(
 );
 
 // ================================
-// GEMINI AI SETUP
+// GEMINI AI SETUP (POPUP ONLY)
 // ================================
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
 
 // ================================
-// CONFIG (PERFORMANCE)
+// CONFIG
 // ================================
-const MAX_FIRES = 300; // 🔥 limit markers for map performance
+const MAX_FIRES = 300;
 
 // ================================
 // ROUTES
@@ -56,14 +69,14 @@ app.get("/", (req, res) => {
 });
 
 /**
- * 🔥 FIRE POINTS (THROTTLED)
+ * 🔥 HISTORICAL FIRE POINTS (MAP)
  */
 app.get("/api/fires", (req, res) => {
   res.json(fireData.slice(0, MAX_FIRES));
 });
 
 /**
- * 📊 DISTRICT RISK DATA
+ * 📊 HISTORICAL DISTRICT RISK
  */
 app.get("/api/district-risk", (req, res) => {
   res.json(districtRisk);
@@ -77,12 +90,70 @@ app.get("/api/districts", (req, res) => {
 });
 
 /**
- * 🤖 GEMINI AI – STRUCTURED DISTRICT RISK PREDICTION
+ * 🔴 REAL-TIME FIRMS (RIGHT PANEL – INDIA)
+ */
+app.get("/api/fires-realtime", (req, res) => {
+  res.json(realtimeFires || []);
+});
+
+/**
+ * 🔴 REAL-TIME FIRMS (SIDEBAR – DISTRICT)
+ * Returns null if no fires found
+ */
+app.get("/api/realtime/:district", (req, res) => {
+  const district = req.params.district.toLowerCase();
+
+  const matches = realtimeFires.filter(
+    f => f.district && f.district.toLowerCase() === district
+  );
+
+  if (matches.length === 0) {
+    return res.json(null);
+  }
+
+  res.json({
+    count: matches.length,
+    status: "Active fire detected"
+  });
+});
+
+/**
+ * 🔮 FUTURE RISK PREDICTION (SIDEBAR – SIMPLE LOGIC)
+ * Explainable, NOT AI
+ */
+app.get("/api/predict/:district", (req, res) => {
+  const district = req.params.district.toLowerCase();
+  const data = districtRisk[district];
+
+  if (!data) {
+    return res.json(null);
+  }
+
+  // 🔹 Simple explainable formula
+  const historicalAvg = 10; // baseline
+  const percentage = Math.min(
+    Math.round((data.count / historicalAvg) * 100),
+    100
+  );
+
+  let level = "Low";
+  if (percentage > 70) level = "High";
+  else if (percentage > 40) level = "Medium";
+
+  res.json({
+    percentage,
+    level,
+    reason:
+      "Prediction based on historical fire frequency compared to long-term average"
+  });
+});
+
+/**
+ * 🤖 GEMINI AI – DISTRICT POPUP (OPTIONAL)
  */
 app.get("/api/ai/predict/:district", async (req, res) => {
   try {
-    const districtName = req.params.district;
-
+    const districtName = req.params.district.toLowerCase();
     const data = districtRisk[districtName];
 
     if (!data) {
@@ -94,23 +165,17 @@ app.get("/api/ai/predict/:district", async (req, res) => {
     const prompt = `
 You are an environmental risk analysis AI.
 
-District Name: ${districtName}
-Total Fire Incidents: ${data.count}
-Current Risk Level: ${data.risk}
-Risk Color Code: ${data.color}
+District: ${districtName}
+Total Fires: ${data.count}
+Risk Level: ${data.risk}
 
-Analyze the historical fire data and predict near-future
-forest fire risk.
-
-Respond ONLY in valid JSON format:
+Respond ONLY in valid JSON:
 {
   "predictedRisk": "Low | Medium | High",
   "trend": "Increasing | Stable | Decreasing",
   "alert": true or false,
   "explanation": "short explanation"
 }
-
-Do not add anything outside JSON.
 `;
 
     const result = await geminiModel.generateContent(prompt);
@@ -118,8 +183,7 @@ Do not add anything outside JSON.
     let aiPrediction;
     try {
       aiPrediction = JSON.parse(result.response.text());
-    } catch (parseError) {
-      console.error("❌ Gemini JSON Parse Error:", result.response.text());
+    } catch {
       return res.status(500).json({
         error: "Invalid AI response format"
       });

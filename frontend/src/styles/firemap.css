@@ -1,20 +1,30 @@
 /* =========================
-   GLOBAL COLOR VARIABLES
+   GLOBAL COLOR VARIABLES (INDIA • FOREST • GIS)
 ========================= */
 :root {
-  --bg-panel: #4dec48;
-  --bg-map: #45f448;
+  /* Backgrounds */
+  --bg-panel: rgba(255, 255, 255, 0.96);
+  --bg-map: #eef3ec; /* light forest tone */
 
-  --border-light: #e2f0e3;
+  /* Borders & shadows */
+  --border-light: #e5e7eb;
+  --border-strong: #cbd5e1;
 
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
+  /* Text */
+  --text-primary: #1f2937;   /* slate */
+  --text-secondary: #4b5563; /* muted govt grey */
 
-  --accent-primary: #fe6a00;
+  /* Accent (Indian governance – subtle saffron) */
+  --accent-primary: #d97706;
 
-  --risk-high: #dc2626;
-  --risk-medium: #f59e0b;
-  --risk-low: #16a34a;
+  /* Fire risk (calm but clear) */
+  --risk-high: #c62828;     /* deep red */
+  --risk-medium: #f9a825;  /* amber */
+  --risk-low: #2e7d32;     /* forest green */
+
+  /* Elevation */
+  --shadow-soft: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-medium: 0 10px 24px rgba(0,0,0,0.14);
 }
 
 /* =========================
@@ -33,10 +43,11 @@
   position: relative;
   flex: 1;
   margin: 1.25rem;
-  border-radius: 1rem;
+  border-radius: 14px;
   border: 1px solid var(--border-light);
   background: var(--bg-map);
   overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
 /* Leaflet must fill parent container */
@@ -44,34 +55,43 @@
   height: 100%;
   width: 100%;
   z-index: 1;
+  border-radius: 14px;
 }
 
-/* Slight brightness for tiles (safe & light) */
+/* Calm, professional GIS tile grading */
 .leaflet-tile-pane {
-  filter: brightness(0.98);
+  filter: saturate(0.85) contrast(1.05) brightness(0.98);
 }
 
 /* =========================
-   BASEMAP TOGGLE
+   BASEMAP TOGGLE (GOV STYLE)
 ========================= */
 .basemap-toggle {
   position: absolute;
   top: 14px;
   right: 14px;
   background: var(--bg-panel);
-  border-radius: 6px;
+  border-radius: 10px;
   overflow: hidden;
   z-index: 1000;
   border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-medium);
+  display: flex;
 }
 
 .basemap-toggle button {
   border: none;
-  background: none;
-  padding: 7px 11px;
+  background: transparent;
+  padding: 8px 14px;
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  color: var(--text-primary);
+  color: var(--text-secondary);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.basemap-toggle button:hover {
+  background: #f1f5f9;
 }
 
 .basemap-toggle button.active {
@@ -80,7 +100,7 @@
 }
 
 /* =========================
-   MAP LEGEND (VISIBLE & CLEAN)
+   MAP LEGEND (PUBLIC SERVICE)
 ========================= */
 .legend {
   position: absolute;
@@ -88,24 +108,33 @@
   left: 18px;
   z-index: 1000;
 
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--bg-panel);
   color: var(--text-primary);
 
   padding: 10px 12px;
-  border-radius: 8px;
+  border-radius: 12px;
 
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
 
   border: 1px solid var(--border-light);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-medium);
+}
+
+.legend-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
 }
 
 .legend div {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
+  gap: 8px;
+  margin-bottom: 6px;
 }
 
 .legend div:last-child {
@@ -113,13 +142,14 @@
 }
 
 /* =========================
-   LEGEND DOTS
+   LEGEND DOTS (SUBTLE)
 ========================= */
 .dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   display: inline-block;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.18);
 }
 
 .red {
@@ -135,13 +165,24 @@
 }
 
 /* =========================
-   FIRE MARKERS (NO ANIMATION)
+   FIRE MARKERS (CALM BUT CLEAR)
 ========================= */
-.fire-marker-high,
-.fire-marker-medium,
+.fire-marker-high {
+  background: var(--risk-high);
+  border: 2px solid rgba(255,255,255,0.95);
+  box-shadow: 0 0 8px rgba(198,40,40,0.6);
+}
+
+.fire-marker-medium {
+  background: var(--risk-medium);
+  border: 2px solid rgba(255,255,255,0.95);
+  box-shadow: 0 0 8px rgba(249,168,37,0.55);
+}
+
 .fire-marker-low {
-  box-shadow: none;
-  animation: none;
+  background: var(--risk-low);
+  border: 2px solid rgba(255,255,255,0.95);
+  box-shadow: 0 0 6px rgba(46,125,50,0.55);
 }
 
 /* =========================
@@ -150,5 +191,16 @@
 @media (max-width: 900px) {
   .map-container {
     margin: 0.75rem;
+    border-radius: 10px;
+  }
+
+  .legend {
+    left: 12px;
+    bottom: 12px;
+  }
+
+  .basemap-toggle {
+    top: 12px;
+    right: 12px;
   }
 }
