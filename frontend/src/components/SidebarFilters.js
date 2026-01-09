@@ -15,26 +15,87 @@ const SidebarFilters = ({
   return (
     <aside className="sidebar">
 
-      <h3>Search & Filters</h3>
-
       {/* =========================
-         SEARCH
+         DISTRICT CONTROL
       ========================= */}
-      <div className="filter-section">
-        <label className="filter-label">Search District</label>
+      <div className="sidebar-block">
+        <h4 className="block-title">District</h4>
         <input
           type="text"
-          placeholder="Type district name"
+          placeholder="Search district"
           value={searchDistrict}
-          onChange={(e) => setSearchDistrict(e.target.value)}
+          onChange={e => setSearchDistrict(e.target.value)}
         />
       </div>
 
       {/* =========================
-         RISK FILTER
+         REAL-TIME STATUS
       ========================= */}
-      <div className="filter-section">
-        <label className="filter-label">Risk Level</label>
+      <div className="sidebar-block status-block">
+        <h4 className="block-title">Real-Time Status</h4>
+
+        {!searchDistrict ? (
+          <p className="muted">Select a district</p>
+        ) : loadingRealtime ? (
+          <p className="muted">Checking FIRMS data…</p>
+        ) : realtimeInfo ? (
+          <>
+            <div className="status-pill danger">
+              🔴 Active Fires Detected
+            </div>
+            <p className="status-text">
+              {realtimeInfo.count} active fire(s)
+            </p>
+          </>
+        ) : (
+          <div className="status-pill safe">
+            🟢 No Active Fire Risk
+          </div>
+        )}
+      </div>
+
+      {/* =========================
+         AI RISK OUTLOOK
+      ========================= */}
+      <div className="sidebar-block ai-block">
+        <h4 className="block-title">AI Risk Outlook</h4>
+
+        {!searchDistrict ? (
+          <p className="muted">Search district to view risk</p>
+        ) : loadingFuture ? (
+          <p className="muted">Analyzing trends…</p>
+        ) : futureRisk ? (
+          <>
+            <div className="risk-meter">
+              <div
+                className={`risk-fill ${futureRisk.level.toLowerCase()}`}
+                style={{ width: `${futureRisk.percentage}%` }}
+              />
+            </div>
+
+            <div className="risk-summary">
+              <span className="risk-value">
+                {futureRisk.percentage}%
+              </span>
+              <span className="risk-label">
+                {futureRisk.level} Risk
+              </span>
+            </div>
+
+            <p className="ai-reason">
+              {futureRisk.reason}
+            </p>
+          </>
+        ) : (
+          <p className="muted">Prediction unavailable</p>
+        )}
+      </div>
+
+      {/* =========================
+         FILTERS (SECONDARY)
+      ========================= */}
+      <div className="sidebar-block">
+        <h4 className="block-title">Filters</h4>
 
         <div className="risk-filters">
           {["high", "medium", "low"].map(level => (
@@ -49,82 +110,25 @@ const SidebarFilters = ({
                   }))
                 }
               />
-              <span className={`risk-dot risk-${level}`} />
-              <span>{level.toUpperCase()}</span>
+              <span className={`risk-dot ${level}`} />
+              {level.toUpperCase()}
             </label>
           ))}
         </div>
-      </div>
 
-      {/* =========================
-         DATE RANGE
-      ========================= */}
-      <div className="filter-section">
-        <label className="filter-label">Date Range</label>
         <div className="date-group">
           <input
             type="date"
             value={dateFrom}
             onChange={e => setDateFrom(e.target.value)}
           />
-          <span className="date-separator">to</span>
+          <span>to</span>
           <input
             type="date"
             value={dateTo}
             onChange={e => setDateTo(e.target.value)}
           />
         </div>
-      </div>
-
-      {/* =========================
-         REAL-TIME FIRE STATUS
-      ========================= */}
-      <div className="sidebar-card">
-        <h4>Real-Time Fire Status</h4>
-
-        {!searchDistrict ? (
-          <p className="muted">Search a district to view status</p>
-        ) : loadingRealtime ? (
-          <p className="muted">Fetching real-time fire data…</p>
-        ) : realtimeInfo ? (
-          <>
-            <p>
-              <strong>Active Fires:</strong> {realtimeInfo.count}
-            </p>
-            <p>
-              <strong>Status:</strong> {realtimeInfo.status}
-            </p>
-          </>
-        ) : (
-          <p className="success">No risk of forest fire</p>
-        )}
-      </div>
-
-      {/* =========================
-         FUTURE RISK PREDICTION
-      ========================= */}
-      <div className="sidebar-card">
-        <h4>Future Risk Prediction</h4>
-
-        {!searchDistrict ? (
-          <p className="muted">Search a district to view prediction</p>
-        ) : loadingFuture ? (
-          <p className="muted">Analyzing historical trends…</p>
-        ) : futureRisk ? (
-          <>
-            <p className="risk-percent">
-              {futureRisk.percentage}%
-            </p>
-            <p>
-              <strong>Risk Level:</strong> {futureRisk.level}
-            </p>
-            <p className="explanation">
-              {futureRisk.reason}
-            </p>
-          </>
-        ) : (
-          <p className="muted">Prediction unavailable</p>
-        )}
       </div>
 
     </aside>

@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 
 /* ===============================
-   REAL-TIME ANALYTICS PANEL
+   NEAR REAL-TIME ANALYTICS PANEL
+   (DECISION SNAPSHOT)
 ================================ */
 const Analytics = ({ selectedDistrict }) => {
   const [fires, setFires] = useState([]);
   const [loading, setLoading] = useState(true);
 
   /* ===============================
-     FETCH REAL-TIME FIRMS DATA
+     FETCH FIRMS DATA
   ================================ */
   useEffect(() => {
     setLoading(true);
@@ -16,7 +17,7 @@ const Analytics = ({ selectedDistrict }) => {
     fetch("http://localhost:5000/api/fires-realtime")
       .then(res => res.json())
       .then(data => {
-        setFires(data || []);
+        setFires(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(err => {
@@ -32,16 +33,13 @@ const Analytics = ({ selectedDistrict }) => {
     if (!selectedDistrict?.district) return fires;
 
     const target = selectedDistrict.district.toLowerCase();
-
     return fires.filter(
-      f =>
-        f.district &&
-        f.district.toLowerCase() === target
+      f => f.district && f.district.toLowerCase() === target
     );
   }, [fires, selectedDistrict]);
 
   /* ===============================
-     LIVE SUMMARY
+     SUMMARY CALCULATION
   ================================ */
   const summary = useMemo(() => {
     const s = { total: 0, High: 0, Medium: 0, Low: 0 };
@@ -57,33 +55,68 @@ const Analytics = ({ selectedDistrict }) => {
   }, [filteredFires]);
 
   /* ===============================
+     LAST SATELLITE UPDATE (FIXED)
+  ================================ */
+  const lastUpdated = useMemo(() => {
+    if (!fires.length) return null;
+
+    return fires.reduce(
+      (latest, f) =>
+        f.acq_date > latest ? f.acq_date : latest,
+      fires[0].acq_date
+    );
+  }, [fires]);
+
+  /* ===============================
+     DAYS AGO (OPTIONAL BUT PRO)
+  ================================ */
+  const daysAgo = lastUpdated
+    ? Math.floor(
+        (Date.now() - new Date(lastUpdated).getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+    : null;
+
+  /* ===============================
      RENDER
   ================================ */
   return (
     <section className="analytics-section">
 
-      <div className="chart-title">
-        🔥 Live Forest Fire Activity
-        {selectedDistrict?.district && (
-          <span className="district-tag">
-            {selectedDistrict.district}
-          </span>
+      {/* ===== TITLE ===== */}
+      <div className="analytics-header">
+        <h2>
+          Near Real-Time Fire Overview
+          {selectedDistrict?.district && (
+            <span className="district-tag">
+              {selectedDistrict.district}
+            </span>
+          )}
+        </h2>
+
+        {lastUpdated && (
+          <div className="subtext">
+            Last satellite update: {lastUpdated}
+            {daysAgo > 0 &&
+              ` (${daysAgo} day${daysAgo > 1 ? "s" : ""} ago)`}
+          </div>
         )}
       </div>
 
+      {/* ===== STATES ===== */}
       {loading ? (
         <div className="loading">
-          Loading real-time data…
+          Loading satellite detections…
         </div>
       ) : filteredFires.length === 0 ? (
         <div className="empty">
           {selectedDistrict
             ? "No active fires detected in this district"
-            : "No active fires detected"}
+            : "No active fires detected nationwide"}
         </div>
       ) : (
         <>
-          {/* 🔢 LIVE STATS */}
+          {/* ===== KPI SNAPSHOT ===== */}
           <div className="analytics-grid">
 
             <div className="stat-card">
@@ -91,24 +124,24 @@ const Analytics = ({ selectedDistrict }) => {
               <div className="stat-value">{summary.total}</div>
             </div>
 
-            <div className="stat-card">
-              <div className="stat-label">High</div>
+            <div className="stat-card risk-high">
+              <div className="stat-label">High Risk</div>
               <div className="stat-value">{summary.High}</div>
             </div>
 
-            <div className="stat-card">
-              <div className="stat-label">Medium</div>
+            <div className="stat-card risk-medium">
+              <div className="stat-label">Medium Risk</div>
               <div className="stat-value">{summary.Medium}</div>
             </div>
 
-            <div className="stat-card">
-              <div className="stat-label">Low</div>
+            <div className="stat-card risk-low">
+              <div className="stat-label">Low Risk</div>
               <div className="stat-value">{summary.Low}</div>
             </div>
 
           </div>
 
-          {/* 📍 LIVE FIRE LIST */}
+          {/* ===== FIRE LIST ===== */}
           <div className="fire-list">
             {filteredFires.slice(0, 15).map((f, idx) => (
               <div key={idx} className="fire-item">

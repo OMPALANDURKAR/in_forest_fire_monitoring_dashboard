@@ -48,28 +48,32 @@ const DistrictSearchHandler = ({
 
       if (normalizeDistrict(rawName) === target) {
         const coords = feature.geometry.coordinates[0];
-
         const bounds = coords.map(([lng, lat]) => [lat, lng]);
+
+        // 1️⃣ Zoom first
         map.fitBounds(bounds, { padding: [40, 40] });
 
-        // centroid for popup (search case)
+        // 2️⃣ Compute centroid for popup
         const centroid = bounds.reduce(
           (acc, cur) => [acc[0] + cur[0], acc[1] + cur[1]],
           [0, 0]
         ).map(v => v / bounds.length);
 
         const info = districtRisk[target];
-        if (info) {
-          onDistrictSelect(
-            {
-              district: rawName,
-              state: info.state,
-              fireCount: info.fire_count,
-              risk: info.risk
-            },
-            centroid
-          );
-        }
+        if (!info) return;
+
+        const districtData = {
+          district: rawName,
+          state: info.state,
+          fireCount: info.fire_count,
+          risk: info.risk
+        };
+
+        // ✅ FIX: open popup ONLY after zoom finishes
+        map.once("moveend", () => {
+          onDistrictSelect(districtData, centroid);
+        });
+
         break;
       }
     }
@@ -94,7 +98,7 @@ const FireMap = ({
   const [districtRisk, setDistrictRisk] = useState({});
   const [basemap, setBasemap] = useState("satellite");
 
-  // popup state
+  // Popup state
   const [popupDistrict, setPopupDistrict] = useState(null);
   const [popupPosition, setPopupPosition] = useState(null);
 
