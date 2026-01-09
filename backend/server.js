@@ -15,22 +15,33 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 // CREATE APP
 // ================================
 const app = express();
-const PORT = 5000;
 
-app.use(cors());
+// ✅ IMPORTANT: use env PORT (Render requirement)
+const PORT = process.env.PORT || 5000;
+
+// ================================
+// MIDDLEWARE
+// ================================
+app.use(
+  cors({
+    origin: "*", // allow Vercel & other devices
+    methods: ["GET"],
+  })
+);
+
 app.use(express.json());
 
 // ================================
 // LOAD DATA (ONCE AT STARTUP)
 // ================================
 
-// 🔹 HISTORICAL FIRE DATA (mapped to districts)
+// 🔹 HISTORICAL FIRE DATA
 const fireData = require("./data/fires_with_location.json");
 
-// 🔹 HISTORICAL DISTRICT RISK SUMMARY
+// 🔹 DISTRICT RISK SUMMARY
 const districtRisk = require("./data/district_risk.json");
 
-// 🔹 REAL-TIME FIRMS DATA (district not guaranteed)
+// 🔹 REAL-TIME FIRMS DATA
 let realtimeFires = [];
 try {
   realtimeFires = require("./data/fires_realtime.json");
@@ -47,7 +58,7 @@ const districtsGeoJSON = JSON.parse(
 );
 
 // ================================
-// GEMINI AI SETUP (POPUP ONLY)
+// GEMINI AI SETUP
 // ================================
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
@@ -61,45 +72,35 @@ const MAX_FIRES = 300;
 // ROUTES
 // ================================
 
-/**
- * ROOT CHECK
- */
+// 🔹 HEALTH CHECK
 app.get("/", (req, res) => {
-  res.send("🔥 Forest Fire Monitoring Backend is running");
+  res.json({
+    status: "OK",
+    message: "🔥 Forest Fire Monitoring Backend is running",
+  });
 });
 
-/**
- * 🔥 HISTORICAL FIRE POINTS (MAP)
- */
+// 🔥 HISTORICAL FIRE POINTS
 app.get("/api/fires", (req, res) => {
   res.json(fireData.slice(0, MAX_FIRES));
 });
 
-/**
- * 📊 HISTORICAL DISTRICT RISK
- */
+// 📊 DISTRICT RISK
 app.get("/api/district-risk", (req, res) => {
   res.json(districtRisk);
 });
 
-/**
- * 🗺️ DISTRICT BOUNDARIES
- */
+// 🗺️ DISTRICT BOUNDARIES
 app.get("/api/districts", (req, res) => {
   res.json(districtsGeoJSON);
 });
 
-/**
- * 🔴 REAL-TIME FIRMS (RIGHT PANEL – INDIA)
- */
+// 🔴 REAL-TIME FIRMS (ALL INDIA)
 app.get("/api/fires-realtime", (req, res) => {
   res.json(realtimeFires || []);
 });
 
-/**
- * 🔴 REAL-TIME FIRMS (SIDEBAR – DISTRICT)
- * Returns null if no fires found
- */
+// 🔴 REAL-TIME FIRMS (DISTRICT)
 app.get("/api/realtime/:district", (req, res) => {
   const district = req.params.district.toLowerCase();
 
@@ -113,14 +114,11 @@ app.get("/api/realtime/:district", (req, res) => {
 
   res.json({
     count: matches.length,
-    status: "Active fire detected"
+    status: "Active fire detected",
   });
 });
 
-/**
- * 🔮 FUTURE RISK PREDICTION (SIDEBAR – SIMPLE LOGIC)
- * Explainable, NOT AI
- */
+// 🔮 FUTURE RISK (LOGIC BASED)
 app.get("/api/predict/:district", (req, res) => {
   const district = req.params.district.toLowerCase();
   const data = districtRisk[district];
@@ -129,8 +127,7 @@ app.get("/api/predict/:district", (req, res) => {
     return res.json(null);
   }
 
-  // 🔹 Simple explainable formula
-  const historicalAvg = 10; // baseline
+  const historicalAvg = 10;
   const percentage = Math.min(
     Math.round((data.count / historicalAvg) * 100),
     100
@@ -144,22 +141,18 @@ app.get("/api/predict/:district", (req, res) => {
     percentage,
     level,
     reason:
-      "Prediction based on historical fire frequency compared to long-term average"
+      "Prediction based on historical fire frequency compared to long-term average",
   });
 });
 
-/**
- * 🤖 GEMINI AI – DISTRICT POPUP (OPTIONAL)
- */
+// 🤖 GEMINI AI (POPUP)
 app.get("/api/ai/predict/:district", async (req, res) => {
   try {
     const districtName = req.params.district.toLowerCase();
     const data = districtRisk[districtName];
 
     if (!data) {
-      return res.status(404).json({
-        error: "District not found in risk data"
-      });
+      return res.status(404).json({ error: "District not found" });
     }
 
     const prompt = `
@@ -180,26 +173,17 @@ Respond ONLY in valid JSON:
 
     const result = await geminiModel.generateContent(prompt);
 
-    let aiPrediction;
-    try {
-      aiPrediction = JSON.parse(result.response.text());
-    } catch {
-      return res.status(500).json({
-        error: "Invalid AI response format"
-      });
-    }
+    const aiPrediction = JSON.parse(result.response.text());
 
     res.json({
       district: districtName,
       currentRisk: data.risk,
-      aiPrediction
+      aiPrediction,
     });
 
-  } catch (error) {
-    console.error("❌ Gemini AI Error:", error);
-    res.status(500).json({
-      error: "Gemini AI prediction failed"
-    });
+  } catch (err) {
+    console.error("❌ Gemini AI Error:", err);
+    res.status(500).json({ error: "Gemini AI prediction failed" });
   }
 });
 
@@ -207,5 +191,5 @@ Respond ONLY in valid JSON:
 // START SERVER
 // ================================
 app.listen(PORT, () => {
-  console.log(`✅ Backend running at http://localhost:${PORT}`);
+  console.log(`✅ Backend running on port ${PORT}`);
 });

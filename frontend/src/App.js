@@ -6,8 +6,6 @@ import "./styles/dashboard.css";
 import Header from "./components/Header";
 import SidebarFilters from "./components/SidebarFilters";
 import Analytics from "./components/Analytics";
-
-// ⚠️ path check kar lena
 import FireMap from "./FireMap";
 
 function App() {
@@ -21,13 +19,13 @@ function App() {
   const [riskFilter, setRiskFilter] = useState({
     high: true,
     medium: true,
-    low: true
+    low: true,
   });
 
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // Selected district (from map click OR search)
+  // Selected district
   const [selectedDistrict, setSelectedDistrict] = useState(null);
 
   // 🔥 Real-time FIRMS
@@ -38,18 +36,20 @@ function App() {
   const [futureRisk, setFutureRisk] = useState(null);
   const [loadingFuture, setLoadingFuture] = useState(false);
 
+  // ✅ BACKEND BASE URL (FROM ENV)
+  const API_BASE = process.env.REACT_APP_API_URL;
+
   /* ===============================
      DERIVED DISTRICT NAME
-     (Search OR Map Click)
   ================================ */
   const activeDistrict =
     selectedDistrict?.district || searchDistrict;
 
   /* ===============================
-     REAL-TIME FIRE STATUS (FIRMS)
+     REAL-TIME FIRE STATUS
   ================================ */
   useEffect(() => {
-    if (!activeDistrict) {
+    if (!activeDistrict || !API_BASE) {
       setRealtimeInfo(null);
       return;
     }
@@ -57,7 +57,7 @@ function App() {
     setLoadingRealtime(true);
 
     fetch(
-      `http://localhost:5000/api/realtime/${activeDistrict.toLowerCase()}`
+      `${API_BASE}/api/realtime/${activeDistrict.toLowerCase()}`
     )
       .then(res => res.json())
       .then(data => {
@@ -69,13 +69,13 @@ function App() {
       })
       .catch(() => setRealtimeInfo(null))
       .finally(() => setLoadingRealtime(false));
-  }, [activeDistrict]);
+  }, [activeDistrict, API_BASE]);
 
   /* ===============================
      FUTURE RISK PREDICTION
   ================================ */
   useEffect(() => {
-    if (!activeDistrict) {
+    if (!activeDistrict || !API_BASE) {
       setFutureRisk(null);
       return;
     }
@@ -83,7 +83,7 @@ function App() {
     setLoadingFuture(true);
 
     fetch(
-      `http://localhost:5000/api/predict/${activeDistrict.toLowerCase()}`
+      `${API_BASE}/api/predict/${activeDistrict.toLowerCase()}`
     )
       .then(res => res.json())
       .then(data => {
@@ -95,7 +95,7 @@ function App() {
       })
       .catch(() => setFutureRisk(null))
       .finally(() => setLoadingFuture(false));
-  }, [activeDistrict]);
+  }, [activeDistrict, API_BASE]);
 
   /* ===============================
      RENDER

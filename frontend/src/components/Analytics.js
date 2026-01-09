@@ -8,13 +8,16 @@ const Analytics = ({ selectedDistrict }) => {
   const [fires, setFires] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ BACKEND BASE URL (FROM VERCEL ENV)
+  const API_BASE = process.env.REACT_APP_API_URL;
+
   /* ===============================
      FETCH FIRMS DATA
   ================================ */
   useEffect(() => {
     setLoading(true);
 
-    fetch("http://localhost:5000/api/fires-realtime")
+    fetch(`${API_BASE}/api/fires-realtime`)
       .then(res => res.json())
       .then(data => {
         setFires(Array.isArray(data) ? data : []);
@@ -24,7 +27,7 @@ const Analytics = ({ selectedDistrict }) => {
         console.error("Real-time fetch error:", err);
         setLoading(false);
       });
-  }, []);
+  }, [API_BASE]);
 
   /* ===============================
      FILTER BY SELECTED DISTRICT
@@ -55,7 +58,7 @@ const Analytics = ({ selectedDistrict }) => {
   }, [filteredFires]);
 
   /* ===============================
-     LAST SATELLITE UPDATE (FIXED)
+     LAST SATELLITE UPDATE
   ================================ */
   const lastUpdated = useMemo(() => {
     if (!fires.length) return null;
@@ -68,7 +71,7 @@ const Analytics = ({ selectedDistrict }) => {
   }, [fires]);
 
   /* ===============================
-     DAYS AGO (OPTIONAL BUT PRO)
+     DAYS AGO
   ================================ */
   const daysAgo = lastUpdated
     ? Math.floor(
@@ -83,7 +86,6 @@ const Analytics = ({ selectedDistrict }) => {
   return (
     <section className="analytics-section">
 
-      {/* ===== TITLE ===== */}
       <div className="analytics-header">
         <h2>
           Near Real-Time Fire Overview
@@ -103,7 +105,6 @@ const Analytics = ({ selectedDistrict }) => {
         )}
       </div>
 
-      {/* ===== STATES ===== */}
       {loading ? (
         <div className="loading">
           Loading satellite detections…
@@ -116,7 +117,6 @@ const Analytics = ({ selectedDistrict }) => {
         </div>
       ) : (
         <>
-          {/* ===== KPI SNAPSHOT ===== */}
           <div className="analytics-grid">
 
             <div className="stat-card">
@@ -141,7 +141,6 @@ const Analytics = ({ selectedDistrict }) => {
 
           </div>
 
-          {/* ===== FIRE LIST ===== */}
           <div className="fire-list">
             {filteredFires.slice(0, 15).map((f, idx) => (
               <div key={idx} className="fire-item">

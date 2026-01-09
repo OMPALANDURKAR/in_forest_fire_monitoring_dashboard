@@ -50,14 +50,14 @@ const DistrictSearchHandler = ({
         const coords = feature.geometry.coordinates[0];
         const bounds = coords.map(([lng, lat]) => [lat, lng]);
 
-        // 1️⃣ Zoom first
         map.fitBounds(bounds, { padding: [40, 40] });
 
-        // 2️⃣ Compute centroid for popup
-        const centroid = bounds.reduce(
-          (acc, cur) => [acc[0] + cur[0], acc[1] + cur[1]],
-          [0, 0]
-        ).map(v => v / bounds.length);
+        const centroid = bounds
+          .reduce(
+            (acc, cur) => [acc[0] + cur[0], acc[1] + cur[1]],
+            [0, 0]
+          )
+          .map(v => v / bounds.length);
 
         const info = districtRisk[target];
         if (!info) return;
@@ -69,7 +69,6 @@ const DistrictSearchHandler = ({
           risk: info.risk
         };
 
-        // ✅ FIX: open popup ONLY after zoom finishes
         map.once("moveend", () => {
           onDistrictSelect(districtData, centroid);
         });
@@ -92,17 +91,18 @@ const FireMap = ({
   dateFrom,
   dateTo
 }) => {
-  /* ---------- STATE ---------- */
   const [fires, setFires] = useState([]);
   const [districtGeo, setDistrictGeo] = useState(null);
   const [districtRisk, setDistrictRisk] = useState({});
   const [basemap, setBasemap] = useState("satellite");
 
-  // Popup state
   const [popupDistrict, setPopupDistrict] = useState(null);
   const [popupPosition, setPopupPosition] = useState(null);
 
   const debouncedSearch = useDebounce(searchDistrict, 500);
+
+  // ✅ BACKEND BASE URL
+  const API_BASE = process.env.REACT_APP_API_URL;
 
   /* ---------- TILE LAYERS ---------- */
   const tileLayers = useMemo(
@@ -122,19 +122,23 @@ const FireMap = ({
 
   /* ---------- FETCH DATA ---------- */
   useEffect(() => {
-    fetch("http://localhost:5000/api/fires")
+    if (!API_BASE) return;
+
+    fetch(`${API_BASE}/api/fires`)
       .then(res => res.json())
       .then(setFires)
       .catch(console.error);
 
-    fetch("http://localhost:5000/api/districts")
+    fetch(`${API_BASE}/api/districts`)
       .then(res => res.json())
-      .then(setDistrictGeo);
+      .then(setDistrictGeo)
+      .catch(console.error);
 
-    fetch("http://localhost:5000/api/district-risk")
+    fetch(`${API_BASE}/api/district-risk`)
       .then(res => res.json())
-      .then(setDistrictRisk);
-  }, []);
+      .then(setDistrictRisk)
+      .catch(console.error);
+  }, [API_BASE]);
 
   /* ---------- FILTER FIRES ---------- */
   const filteredFires = useMemo(() => {
@@ -162,7 +166,6 @@ const FireMap = ({
   return (
     <div className="map-container">
 
-      {/* BASEMAP TOGGLE */}
       <div className="basemap-toggle">
         <button
           className={basemap === "street" ? "active" : ""}
@@ -184,7 +187,6 @@ const FireMap = ({
           attribution={tileLayers[basemap].attribution}
         />
 
-        {/* DISTRICT BOUNDARIES */}
         {districtGeo && (
           <GeoJSON
             data={districtGeo}
@@ -215,7 +217,6 @@ const FireMap = ({
           />
         )}
 
-        {/* DISTRICT POPUP */}
         {popupDistrict && popupPosition && (
           <Popup
             position={popupPosition}
@@ -236,7 +237,6 @@ const FireMap = ({
           </Popup>
         )}
 
-        {/* FIRE POINTS */}
         {filteredFires.map((f, idx) => {
           const lat = Number(f.latitude);
           const lon = Number(f.longitude);
@@ -265,7 +265,6 @@ const FireMap = ({
           );
         })}
 
-        {/* SEARCH HANDLER */}
         {districtGeo && (
           <DistrictSearchHandler
             districtGeo={districtGeo}
@@ -280,7 +279,6 @@ const FireMap = ({
         )}
       </MapContainer>
 
-      {/* LEGEND */}
       <div className="legend">
         <div><span className="dot red" /> High</div>
         <div><span className="dot orange" /> Medium</div>

@@ -5,21 +5,27 @@ const DistrictPopup = ({ district, position, onClose }) => {
   const [aiData, setAiData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ BACKEND BASE URL (FROM ENV)
+  const API_BASE = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
-    if (!district?.district) return;
+    if (!district?.district || !API_BASE) return;
 
     setLoading(true);
 
     fetch(
-      `http://localhost:5000/api/ai/predict/${district.district.toLowerCase()}`
+      `${API_BASE}/api/ai/predict/${district.district.toLowerCase()}`
     )
       .then(res => res.json())
       .then(data => {
-        setAiData(data.aiPrediction);
+        setAiData(data.aiPrediction || null);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  }, [district]);
+      .catch(err => {
+        console.error("AI fetch error:", err);
+        setLoading(false);
+      });
+  }, [district, API_BASE]);
 
   if (!district || !position) return null;
 
