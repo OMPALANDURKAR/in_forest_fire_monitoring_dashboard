@@ -1,33 +1,44 @@
 import { useEffect, useMemo, useState } from "react";
 
 /* ===============================
+   BACKEND BASE URL (BUILD-TIME)
+================================ */
+const API_BASE = process.env.REACT_APP_API_URL;
+
+/* ===============================
    NEAR REAL-TIME ANALYTICS PANEL
-   (DECISION SNAPSHOT)
 ================================ */
 const Analytics = ({ selectedDistrict }) => {
   const [fires, setFires] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ BACKEND BASE URL (FROM VERCEL ENV)
-  const API_BASE = process.env.REACT_APP_API_URL;
-
   /* ===============================
      FETCH FIRMS DATA
   ================================ */
   useEffect(() => {
+    if (!API_BASE) {
+      console.error("❌ REACT_APP_API_URL is missing");
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
 
     fetch(`${API_BASE}/api/fires-realtime`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch realtime fires");
+        return res.json();
+      })
       .then(data => {
         setFires(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch(err => {
-        console.error("Real-time fetch error:", err);
+        console.error("❌ Real-time fetch error:", err);
+        setFires([]);
         setLoading(false);
       });
-  }, [API_BASE]);
+  }, []);
 
   /* ===============================
      FILTER BY SELECTED DISTRICT
@@ -70,9 +81,6 @@ const Analytics = ({ selectedDistrict }) => {
     );
   }, [fires]);
 
-  /* ===============================
-     DAYS AGO
-  ================================ */
   const daysAgo = lastUpdated
     ? Math.floor(
         (Date.now() - new Date(lastUpdated).getTime()) /

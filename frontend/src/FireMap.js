@@ -12,6 +12,11 @@ import "./styles/firemap.css";
 import useDebounce from "./hooks/useDebounce";
 
 /* ===============================
+   BACKEND BASE URL (BUILD-TIME)
+================================ */
+const API_BASE = process.env.REACT_APP_API_URL;
+
+/* ===============================
    UTILS
 ================================ */
 const normalizeDistrict = (name) =>
@@ -33,7 +38,7 @@ const DistrictSearchHandler = ({
   districtGeo,
   districtRisk,
   searchDistrict,
-  onDistrictSelect
+  setSelectedDistrict
 }) => {
   const map = useMap();
 
@@ -43,40 +48,29 @@ const DistrictSearchHandler = ({
     const target = searchDistrict.toLowerCase().trim();
 
     for (const feature of districtGeo.features) {
-      const rawName = getDistrictName(feature.properties);
-      if (!rawName) continue;
+      const raw = getDistrictName(feature.properties);
+      if (!raw) continue;
 
-      if (normalizeDistrict(rawName) === target) {
-        const coords = feature.geometry.coordinates[0];
-        const bounds = coords.map(([lng, lat]) => [lat, lng]);
+      if (normalizeDistrict(raw) === target) {
+        const bounds = feature.geometry.coordinates[0].map(
+          ([lng, lat]) => [lat, lng]
+        );
 
         map.fitBounds(bounds, { padding: [40, 40] });
 
-        const centroid = bounds
-          .reduce(
-            (acc, cur) => [acc[0] + cur[0], acc[1] + cur[1]],
-            [0, 0]
-          )
-          .map(v => v / bounds.length);
-
         const info = districtRisk[target];
-        if (!info) return;
-
-        const districtData = {
-          district: rawName,
-          state: info.state,
-          fireCount: info.fire_count,
-          risk: info.risk
-        };
-
-        map.once("moveend", () => {
-          onDistrictSelect(districtData, centroid);
-        });
-
+        if (info) {
+          setSelectedDistrict({
+            district: raw,
+            state: info.state,
+            fireCount: info.fire_count,
+            risk: info.risk
+          });
+        }
         break;
       }
     }
-  }, [searchDistrict, districtGeo, districtRisk, map, onDistrictSelect]);
+  }, [searchDistrict, districtGeo, districtRisk, map, setSelectedDistrict]);
 
   return null;
 };
@@ -95,16 +89,13 @@ const FireMap = ({
   const [districtGeo, setDistrictGeo] = useState(null);
   const [districtRisk, setDistrictRisk] = useState({});
   const [basemap, setBasemap] = useState("satellite");
-
-  const [popupDistrict, setPopupDistrict] = useState(null);
-  const [popupPosition, setPopupPosition] = useState(null);
+  const [dataMode, setDataMode] = useState("historical");
 
   const debouncedSearch = useDebounce(searchDistrict, 500);
 
-  // ✅ BACKEND BASE URL
-  const API_BASE = process.env.REACT_APP_API_URL;
-
-  /* ---------- TILE LAYERS ---------- */
+  /* ===============================
+     TILE LAYERS
+  ================================ */
   const tileLayers = useMemo(
     () => ({
       street: {
@@ -120,14 +111,31 @@ const FireMap = ({
     []
   );
 
-  /* ---------- FETCH DATA ---------- */
+  /* ===============================
+     FETCH FIRE DATA
+  ================================ */
   useEffect(() => {
-    if (!API_BASE) return;
+    if (!API_BASE) {
+      console.error("❌ REACT_APP_API_URL missing");
+      return;
+    }
 
-    fetch(`${API_BASE}/api/fires`)
+    const url =
+      dataMode === "historical"
+        ? `${API_BASE}/api/fires`
+        : `${API_BASE}/api/fires-realtime`;
+
+    fetch(url)
       .then(res => res.json())
       .then(setFires)
-      .catch(console.error);
+      .catch(err => console.error("❌ Fire fetch error:", err));
+  }, [dataMode]);
+
+  /* ===============================
+     FETCH STATIC DATA
+  ================================ */
+  useEffect(() => {
+    if (!API_BASE) return;
 
     fetch(`${API_BASE}/api/districts`)
       .then(res => res.json())
@@ -138,34 +146,59 @@ const FireMap = ({
       .then(res => res.json())
       .then(setDistrictRisk)
       .catch(console.error);
-  }, [API_BASE]);
+  }, []);
 
-  /* ---------- FILTER FIRES ---------- */
-  const filteredFires = useMemo(() => {
+  /* ===============================
+     FILTERS
+  ================================ */
+  const riskFilteredFires = useMemo(() => {
     return fires.filter(f => {
       if (f.brightness > 350 && !riskFilter.high) return false;
       if (f.brightness >= 300 && f.brightness <= 350 && !riskFilter.medium)
         return false;
       if (f.brightness < 300 && !riskFilter.low) return false;
-
-      if (dateFrom && dateTo) {
-        const d = new Date(f.acq_date);
-        if (d < new Date(dateFrom) || d > new Date(dateTo)) return false;
-      }
-
       return true;
     });
-  }, [fires, riskFilter, dateFrom, dateTo]);
+  }, [fires, riskFilter]);
 
-  const fireColor = (b) =>
-    b > 350 ? "#b71c1c" : b >= 300 ? "#f9a825" : "#1b5e20";
+  const finalFires = useMemo(() => {
+    if (!dateFrom || !dateTo) return riskFilteredFires;
+
+    const from = new Date(dateFrom);
+    const to = new Date(dateTo);
+
+    return riskFilteredFires.filter(f => {
+      const d = new Date(f.acq_date);
+      return d >= from && d <= to;
+    });
+  }, [riskFilteredFires, dateFrom, dateTo]);
 
   /* ===============================
-     RENDER
+     COLOR LOGIC
   ================================ */
+  const fireColor = (b) =>
+    b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
+
   return (
     <div className="map-container">
 
+      {/* DATA MODE TOGGLE */}
+      <div className="data-toggle">
+        <button
+          className={dataMode === "historical" ? "active" : ""}
+          onClick={() => setDataMode("historical")}
+        >
+          Historical
+        </button>
+        <button
+          className={dataMode === "realtime" ? "active" : ""}
+          onClick={() => setDataMode("realtime")}
+        >
+          FIRMS
+        </button>
+      </div>
+
+      {/* BASEMAP TOGGLE */}
       <div className="basemap-toggle">
         <button
           className={basemap === "street" ? "active" : ""}
@@ -190,54 +223,27 @@ const FireMap = ({
         {districtGeo && (
           <GeoJSON
             data={districtGeo}
-            style={{
-              color: "#64748b",
-              weight: 0.6,
-              fillOpacity: 0
-            }}
+            style={{ color: "#64748b", weight: 0.6, fillOpacity: 0 }}
             onEachFeature={(feature, layer) => {
               const name = getDistrictName(feature.properties);
               const key = normalizeDistrict(name);
               const info = districtRisk[key];
-              if (!info) return;
 
-              layer.on("click", (e) => {
-                const districtData = {
-                  district: name,
-                  state: info.state,
-                  fireCount: info.fire_count,
-                  risk: info.risk
-                };
-
-                setPopupDistrict(districtData);
-                setPopupPosition([e.latlng.lat, e.latlng.lng]);
-                setSelectedDistrict(districtData);
-              });
+              if (info) {
+                layer.on("click", () => {
+                  setSelectedDistrict({
+                    district: name,
+                    state: info.state,
+                    fireCount: info.fire_count,
+                    risk: info.risk
+                  });
+                });
+              }
             }}
           />
         )}
 
-        {popupDistrict && popupPosition && (
-          <Popup
-            position={popupPosition}
-            closeButton
-            eventHandlers={{
-              remove: () => {
-                setPopupDistrict(null);
-                setPopupPosition(null);
-              }
-            }}
-          >
-            <div className="district-popup-content">
-              <h3>{popupDistrict.district}</h3>
-              <div><strong>State:</strong> {popupDistrict.state}</div>
-              <div><strong>Total Fires:</strong> {popupDistrict.fireCount}</div>
-              <div><strong>Risk Level:</strong> {popupDistrict.risk}</div>
-            </div>
-          </Popup>
-        )}
-
-        {filteredFires.map((f, idx) => {
+        {finalFires.map((f, idx) => {
           const lat = Number(f.latitude);
           const lon = Number(f.longitude);
           if (isNaN(lat) || isNaN(lon)) return null;
@@ -246,7 +252,7 @@ const FireMap = ({
             <CircleMarker
               key={idx}
               center={[lat, lon]}
-              radius={4}
+              radius={f.brightness > 350 ? 4 : 3}
               pathOptions={{
                 color: fireColor(f.brightness),
                 fillColor: fireColor(f.brightness),
@@ -255,7 +261,7 @@ const FireMap = ({
               }}
             >
               <Popup>
-                <div style={{ fontSize: "13px", lineHeight: "1.5" }}>
+                <div style={{ fontSize: "13px" }}>
                   <div><strong>District:</strong> {f.district || "N/A"}</div>
                   <div><strong>Risk:</strong> {getFireRisk(f.brightness)}</div>
                   <div><strong>Date:</strong> {f.acq_date}</div>
@@ -270,11 +276,7 @@ const FireMap = ({
             districtGeo={districtGeo}
             districtRisk={districtRisk}
             searchDistrict={debouncedSearch}
-            onDistrictSelect={(data, pos) => {
-              setPopupDistrict(data);
-              setPopupPosition(pos);
-              setSelectedDistrict(data);
-            }}
+            setSelectedDistrict={setSelectedDistrict}
           />
         )}
       </MapContainer>

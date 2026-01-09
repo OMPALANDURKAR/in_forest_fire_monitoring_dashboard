@@ -1,31 +1,38 @@
 import { useEffect, useState } from "react";
 import { Popup } from "react-leaflet";
 
+// ✅ DEFINE ONCE (BUILD-TIME ENV)
+const API_BASE = process.env.REACT_APP_API_URL;
+
 const DistrictPopup = ({ district, position, onClose }) => {
   const [aiData, setAiData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // ✅ BACKEND BASE URL (FROM ENV)
-  const API_BASE = process.env.REACT_APP_API_URL;
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!district?.district || !API_BASE) return;
+    // 🛑 SAFETY GUARDS
+    if (!district?.district) return;
+    if (!API_BASE) {
+      console.error("❌ REACT_APP_API_URL is missing");
+      return;
+    }
 
     setLoading(true);
 
-    fetch(
-      `${API_BASE}/api/ai/predict/${district.district.toLowerCase()}`
-    )
-      .then(res => res.json())
+    fetch(`${API_BASE}/api/ai/predict/${district.district.toLowerCase()}`)
+      .then(res => {
+        if (!res.ok) throw new Error("AI API failed");
+        return res.json();
+      })
       .then(data => {
         setAiData(data.aiPrediction || null);
         setLoading(false);
       })
       .catch(err => {
-        console.error("AI fetch error:", err);
+        console.error("❌ AI fetch error:", err);
+        setAiData(null);
         setLoading(false);
       });
-  }, [district, API_BASE]);
+  }, [district]);
 
   if (!district || !position) return null;
 

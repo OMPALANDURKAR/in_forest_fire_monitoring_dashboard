@@ -8,6 +8,11 @@ import SidebarFilters from "./components/SidebarFilters";
 import Analytics from "./components/Analytics";
 import FireMap from "./FireMap";
 
+/* ===============================
+   BACKEND BASE URL (BUILD-TIME)
+================================ */
+const API_BASE = process.env.REACT_APP_API_URL;
+
 function App() {
   /* ===============================
      GLOBAL STATES
@@ -36,11 +41,8 @@ function App() {
   const [futureRisk, setFutureRisk] = useState(null);
   const [loadingFuture, setLoadingFuture] = useState(false);
 
-  // ✅ BACKEND BASE URL (FROM ENV)
-  const API_BASE = process.env.REACT_APP_API_URL;
-
   /* ===============================
-     DERIVED DISTRICT NAME
+     ACTIVE DISTRICT
   ================================ */
   const activeDistrict =
     selectedDistrict?.district || searchDistrict;
@@ -49,7 +51,13 @@ function App() {
      REAL-TIME FIRE STATUS
   ================================ */
   useEffect(() => {
-    if (!activeDistrict || !API_BASE) {
+    if (!activeDistrict) {
+      setRealtimeInfo(null);
+      return;
+    }
+
+    if (!API_BASE) {
+      console.error("❌ REACT_APP_API_URL is missing");
       setRealtimeInfo(null);
       return;
     }
@@ -59,7 +67,10 @@ function App() {
     fetch(
       `${API_BASE}/api/realtime/${activeDistrict.toLowerCase()}`
     )
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Realtime API failed");
+        return res.json();
+      })
       .then(data => {
         if (!data || data.count === 0) {
           setRealtimeInfo(null);
@@ -67,15 +78,24 @@ function App() {
           setRealtimeInfo(data);
         }
       })
-      .catch(() => setRealtimeInfo(null))
+      .catch(err => {
+        console.error("❌ Realtime fetch error:", err);
+        setRealtimeInfo(null);
+      })
       .finally(() => setLoadingRealtime(false));
-  }, [activeDistrict, API_BASE]);
+  }, [activeDistrict]);
 
   /* ===============================
      FUTURE RISK PREDICTION
   ================================ */
   useEffect(() => {
-    if (!activeDistrict || !API_BASE) {
+    if (!activeDistrict) {
+      setFutureRisk(null);
+      return;
+    }
+
+    if (!API_BASE) {
+      console.error("❌ REACT_APP_API_URL is missing");
       setFutureRisk(null);
       return;
     }
@@ -85,17 +105,19 @@ function App() {
     fetch(
       `${API_BASE}/api/predict/${activeDistrict.toLowerCase()}`
     )
-      .then(res => res.json())
-      .then(data => {
-        if (data) {
-          setFutureRisk(data);
-        } else {
-          setFutureRisk(null);
-        }
+      .then(res => {
+        if (!res.ok) throw new Error("Predict API failed");
+        return res.json();
       })
-      .catch(() => setFutureRisk(null))
+      .then(data => {
+        setFutureRisk(data || null);
+      })
+      .catch(err => {
+        console.error("❌ Prediction fetch error:", err);
+        setFutureRisk(null);
+      })
       .finally(() => setLoadingFuture(false));
-  }, [activeDistrict, API_BASE]);
+  }, [activeDistrict]);
 
   /* ===============================
      RENDER
