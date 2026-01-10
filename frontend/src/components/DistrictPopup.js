@@ -1,41 +1,58 @@
 import { useEffect, useState } from "react";
 import { Popup } from "react-leaflet";
 
-// ✅ DEFINE ONCE (BUILD-TIME ENV)
-const API_BASE = process.env.REACT_APP_API_URL;
+/* ===============================
+   BACKEND BASE URL (BUILD-TIME)
+================================ */
+const API_BASE =
+  process.env.REACT_APP_API_URL ||
+  "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 const DistrictPopup = ({ district, position, onClose }) => {
   const [aiData, setAiData] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  /* ===============================
+     FETCH AI PREDICTION
+  ================================ */
   useEffect(() => {
-    // 🛑 SAFETY GUARDS
     if (!district?.district) return;
     if (!API_BASE) {
-      console.error("❌ REACT_APP_API_URL is missing");
+      console.error("❌ API base URL missing");
       return;
     }
 
+    const controller = new AbortController();
     setLoading(true);
 
-    fetch(`${API_BASE}/api/ai/predict/${district.district.toLowerCase()}`)
+    fetch(
+      `${API_BASE}/api/ai/predict/${district.district.toLowerCase()}`,
+      { signal: controller.signal }
+    )
       .then(res => {
         if (!res.ok) throw new Error("AI API failed");
         return res.json();
       })
       .then(data => {
-        setAiData(data.aiPrediction || null);
+        setAiData(data?.aiPrediction || null);
         setLoading(false);
       })
       .catch(err => {
-        console.error("❌ AI fetch error:", err);
-        setAiData(null);
-        setLoading(false);
+        if (err.name !== "AbortError") {
+          console.error("❌ AI fetch error:", err);
+          setAiData(null);
+          setLoading(false);
+        }
       });
+
+    return () => controller.abort();
   }, [district]);
 
   if (!district || !position) return null;
 
+  /* ===============================
+     RENDER
+  ================================ */
   return (
     <Popup position={position} closeButton={false}>
       <div className="district-popup-content">

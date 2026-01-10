@@ -11,7 +11,9 @@ import FireMap from "./FireMap";
 /* ===============================
    BACKEND BASE URL (BUILD-TIME)
 ================================ */
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE =
+  process.env.REACT_APP_API_URL ||
+  "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 function App() {
   /* ===============================
@@ -51,59 +53,53 @@ function App() {
      REAL-TIME FIRE STATUS
   ================================ */
   useEffect(() => {
-    if (!activeDistrict) {
+    if (!activeDistrict || !API_BASE) {
       setRealtimeInfo(null);
       return;
     }
 
-    if (!API_BASE) {
-      console.error("❌ REACT_APP_API_URL is missing");
-      setRealtimeInfo(null);
-      return;
-    }
-
+    const controller = new AbortController();
     setLoadingRealtime(true);
 
     fetch(
-      `${API_BASE}/api/realtime/${activeDistrict.toLowerCase()}`
+      `${API_BASE}/api/realtime/${activeDistrict.toLowerCase()}`,
+      { signal: controller.signal }
     )
       .then(res => {
         if (!res.ok) throw new Error("Realtime API failed");
         return res.json();
       })
       .then(data => {
-        if (!data || data.count === 0) {
-          setRealtimeInfo(null);
-        } else {
-          setRealtimeInfo(data);
-        }
+        setRealtimeInfo(
+          data && data.count > 0 ? data : null
+        );
       })
       .catch(err => {
-        console.error("❌ Realtime fetch error:", err);
-        setRealtimeInfo(null);
+        if (err.name !== "AbortError") {
+          console.error("❌ Realtime fetch error:", err);
+          setRealtimeInfo(null);
+        }
       })
       .finally(() => setLoadingRealtime(false));
+
+    return () => controller.abort();
   }, [activeDistrict]);
 
   /* ===============================
      FUTURE RISK PREDICTION
   ================================ */
   useEffect(() => {
-    if (!activeDistrict) {
+    if (!activeDistrict || !API_BASE) {
       setFutureRisk(null);
       return;
     }
 
-    if (!API_BASE) {
-      console.error("❌ REACT_APP_API_URL is missing");
-      setFutureRisk(null);
-      return;
-    }
-
+    const controller = new AbortController();
     setLoadingFuture(true);
 
     fetch(
-      `${API_BASE}/api/predict/${activeDistrict.toLowerCase()}`
+      `${API_BASE}/api/predict/${activeDistrict.toLowerCase()}`,
+      { signal: controller.signal }
     )
       .then(res => {
         if (!res.ok) throw new Error("Predict API failed");
@@ -113,10 +109,14 @@ function App() {
         setFutureRisk(data || null);
       })
       .catch(err => {
-        console.error("❌ Prediction fetch error:", err);
-        setFutureRisk(null);
+        if (err.name !== "AbortError") {
+          console.error("❌ Prediction fetch error:", err);
+          setFutureRisk(null);
+        }
       })
       .finally(() => setLoadingFuture(false));
+
+    return () => controller.abort();
   }, [activeDistrict]);
 
   /* ===============================

@@ -14,7 +14,9 @@ import useDebounce from "./hooks/useDebounce";
 /* ===============================
    BACKEND BASE URL (BUILD-TIME)
 ================================ */
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE =
+  process.env.REACT_APP_API_URL ||
+  "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 /* ===============================
    UTILS
@@ -43,7 +45,7 @@ const DistrictSearchHandler = ({
   const map = useMap();
 
   useEffect(() => {
-    if (!searchDistrict || !districtGeo) return;
+    if (!searchDistrict || !districtGeo?.features) return;
 
     const target = searchDistrict.toLowerCase().trim();
 
@@ -52,11 +54,14 @@ const DistrictSearchHandler = ({
       if (!raw) continue;
 
       if (normalizeDistrict(raw) === target) {
-        const bounds = feature.geometry.coordinates[0].map(
-          ([lng, lat]) => [lat, lng]
-        );
-
-        map.fitBounds(bounds, { padding: [40, 40] });
+        try {
+          const bounds = feature.geometry.coordinates[0].map(
+            ([lng, lat]) => [lat, lng]
+          );
+          map.fitBounds(bounds, { padding: [40, 40] });
+        } catch {
+          /* ignore invalid geometry */
+        }
 
         const info = districtRisk[target];
         if (info) {
@@ -115,20 +120,28 @@ const FireMap = ({
      FETCH FIRE DATA
   ================================ */
   useEffect(() => {
-    if (!API_BASE) {
-      console.error("❌ REACT_APP_API_URL missing");
-      return;
-    }
+    if (!API_BASE) return;
 
+    const controller = new AbortController();
     const url =
       dataMode === "historical"
         ? `${API_BASE}/api/fires`
         : `${API_BASE}/api/fires-realtime`;
 
-    fetch(url)
-      .then(res => res.json())
-      .then(setFires)
-      .catch(err => console.error("❌ Fire fetch error:", err));
+    fetch(url, { signal: controller.signal })
+      .then(res => {
+        if (!res.ok) throw new Error("Fire API failed");
+        return res.json();
+      })
+      .then(data => setFires(Array.isArray(data) ? data : []))
+      .catch(err => {
+        if (err.name !== "AbortError") {
+          console.error("❌ Fire fetch error:", err);
+          setFires([]);
+        }
+      });
+
+    return () => controller.abort();
   }, [dataMode]);
 
   /* ===============================
@@ -137,15 +150,19 @@ const FireMap = ({
   useEffect(() => {
     if (!API_BASE) return;
 
-    fetch(`${API_BASE}/api/districts`)
+    const controller = new AbortController();
+
+    fetch(`${API_BASE}/api/districts`, { signal: controller.signal })
       .then(res => res.json())
       .then(setDistrictGeo)
-      .catch(console.error);
+      .catch(() => setDistrictGeo(null));
 
-    fetch(`${API_BASE}/api/district-risk`)
+    fetch(`${API_BASE}/api/district-risk`, { signal: controller.signal })
       .then(res => res.json())
       .then(setDistrictRisk)
-      .catch(console.error);
+      .catch(() => setDistrictRisk({}));
+
+    return () => controller.abort();
   }, []);
 
   /* ===============================

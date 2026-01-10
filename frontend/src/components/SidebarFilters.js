@@ -1,16 +1,16 @@
 const SidebarFilters = ({
-  searchDistrict,
+  searchDistrict = "",
   setSearchDistrict,
-  riskFilter,
+  riskFilter = {},
   setRiskFilter,
-  dateFrom,
+  dateFrom = "",
   setDateFrom,
-  dateTo,
+  dateTo = "",
   setDateTo,
   realtimeInfo,
   futureRisk,
-  loadingRealtime,
-  loadingFuture
+  loadingRealtime = false,
+  loadingFuture = false
 }) => {
   return (
     <aside className="sidebar">
@@ -23,7 +23,7 @@ const SidebarFilters = ({
         <input
           type="text"
           placeholder="Search district"
-          value={searchDistrict || ""}
+          value={searchDistrict}
           onChange={e => setSearchDistrict(e.target.value)}
         />
       </div>
@@ -38,7 +38,7 @@ const SidebarFilters = ({
           <p className="muted">Select a district</p>
         ) : loadingRealtime ? (
           <p className="muted">Checking FIRMS data…</p>
-        ) : realtimeInfo && realtimeInfo.count > 0 ? (
+        ) : realtimeInfo?.count > 0 ? (
           <>
             <div className="status-pill danger">
               🔴 Active Fires Detected
@@ -68,7 +68,7 @@ const SidebarFilters = ({
           <>
             <div className="risk-meter">
               <div
-                className={`risk-fill ${futureRisk.level?.toLowerCase()}`}
+                className={`risk-fill ${futureRisk.level?.toLowerCase() || ""}`}
                 style={{ width: `${futureRisk.percentage || 0}%` }}
               />
             </div>
@@ -119,13 +119,13 @@ const SidebarFilters = ({
         <div className="date-group">
           <input
             type="date"
-            value={dateFrom || ""}
+            value={dateFrom}
             onChange={e => setDateFrom(e.target.value)}
           />
           <span>to</span>
           <input
             type="date"
-            value={dateTo || ""}
+            value={dateTo}
             onChange={e => setDateTo(e.target.value)}
           />
         </div>

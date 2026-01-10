@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 /* ===============================
    BACKEND BASE URL (BUILD-TIME)
 ================================ */
-const API_BASE = process.env.REACT_APP_API_URL;
+const API_BASE =
+  process.env.REACT_APP_API_URL ||
+  "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 /* ===============================
    NEAR REAL-TIME ANALYTICS PANEL
@@ -17,14 +19,17 @@ const Analytics = ({ selectedDistrict }) => {
   ================================ */
   useEffect(() => {
     if (!API_BASE) {
-      console.error("❌ REACT_APP_API_URL is missing");
+      console.error("❌ API base URL missing");
       setLoading(false);
       return;
     }
 
+    const controller = new AbortController();
     setLoading(true);
 
-    fetch(`${API_BASE}/api/fires-realtime`)
+    fetch(`${API_BASE}/api/fires-realtime`, {
+      signal: controller.signal,
+    })
       .then(res => {
         if (!res.ok) throw new Error("Failed to fetch realtime fires");
         return res.json();
@@ -34,10 +39,14 @@ const Analytics = ({ selectedDistrict }) => {
         setLoading(false);
       })
       .catch(err => {
-        console.error("❌ Real-time fetch error:", err);
-        setFires([]);
-        setLoading(false);
+        if (err.name !== "AbortError") {
+          console.error("❌ Real-time fetch error:", err);
+          setFires([]);
+          setLoading(false);
+        }
       });
+
+    return () => controller.abort();
   }, []);
 
   /* ===============================
@@ -48,7 +57,7 @@ const Analytics = ({ selectedDistrict }) => {
 
     const target = selectedDistrict.district.toLowerCase();
     return fires.filter(
-      f => f.district && f.district.toLowerCase() === target
+      f => f?.district?.toLowerCase() === target
     );
   }, [fires, selectedDistrict]);
 
@@ -93,7 +102,6 @@ const Analytics = ({ selectedDistrict }) => {
   ================================ */
   return (
     <section className="analytics-section">
-
       <div className="analytics-header">
         <h2>
           Near Real-Time Fire Overview
@@ -126,7 +134,6 @@ const Analytics = ({ selectedDistrict }) => {
       ) : (
         <>
           <div className="analytics-grid">
-
             <div className="stat-card">
               <div className="stat-label">Active Fires</div>
               <div className="stat-value">{summary.total}</div>
@@ -146,13 +153,11 @@ const Analytics = ({ selectedDistrict }) => {
               <div className="stat-label">Low Risk</div>
               <div className="stat-value">{summary.Low}</div>
             </div>
-
           </div>
 
           <div className="fire-list">
             {filteredFires.slice(0, 15).map((f, idx) => (
               <div key={idx} className="fire-item">
-
                 <div className={`fire-risk ${getRiskClass(f.brightness)}`}>
                   {getRiskLabel(f.brightness)}
                 </div>
@@ -163,13 +168,11 @@ const Analytics = ({ selectedDistrict }) => {
                   <div><strong>Date:</strong> {f.acq_date}</div>
                   <div><strong>Time:</strong> {f.acq_time}</div>
                 </div>
-
               </div>
             ))}
           </div>
         </>
       )}
-
     </section>
   );
 };

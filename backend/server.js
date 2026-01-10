@@ -1,23 +1,26 @@
 // ================================
 // IMPORTS
 // ================================
-require("dotenv").config();
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 
-// Gemini AI (ONLY for popup explanation)
+// Gemini AI
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // ================================
 // CREATE APP
 // ================================
 const app = express();
+app.set("trust proxy", 1);
 
-// ✅ Render requires env PORT
-const PORT = process.env.PORT || 5000;
+// ✅ Render provides PORT automatically
+const PORT = process.env.PORT || 10000;
 
 // ================================
 // MIDDLEWARE
@@ -81,7 +84,7 @@ if (process.env.GEMINI_API_KEY) {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
 } else {
-  console.warn("⚠️ GEMINI_API_KEY not set. AI route will be disabled.");
+  console.warn("⚠️ GEMINI_API_KEY not set. AI route disabled.");
 }
 
 // ================================
@@ -93,7 +96,7 @@ const MAX_FIRES = 300;
 // ROUTES
 // ================================
 
-// 🔹 HEALTH CHECK (MANDATORY FOR RENDER)
+// 🔹 HEALTH CHECK
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "OK",
@@ -129,9 +132,7 @@ app.get("/api/realtime/:district", (req, res) => {
     f => f.district && f.district.toLowerCase() === district
   );
 
-  if (matches.length === 0) {
-    return res.json(null);
-  }
+  if (!matches.length) return res.json(null);
 
   res.json({
     count: matches.length,
@@ -144,9 +145,7 @@ app.get("/api/predict/:district", (req, res) => {
   const district = req.params.district.toLowerCase();
   const data = districtRisk[district];
 
-  if (!data) {
-    return res.json(null);
-  }
+  if (!data) return res.json(null);
 
   const historicalAvg = 10;
   const percentage = Math.min(
@@ -170,7 +169,7 @@ app.get("/api/predict/:district", (req, res) => {
 app.get("/api/ai/predict/:district", async (req, res) => {
   if (!geminiModel) {
     return res.status(503).json({
-      error: "AI service unavailable (missing API key)",
+      error: "AI service unavailable",
     });
   }
 
@@ -206,11 +205,15 @@ Respond ONLY in valid JSON:
       currentRisk: data.risk,
       aiPrediction,
     });
-
   } catch (err) {
     console.error("❌ Gemini AI Error:", err);
     res.status(500).json({ error: "Gemini AI prediction failed" });
   }
+});
+
+// 🔻 404 HANDLER (IMPORTANT)
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
 });
 
 // ================================
