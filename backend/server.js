@@ -16,7 +16,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 // ================================
 const app = express();
 
-// ✅ IMPORTANT: use env PORT (Render requirement)
+// ✅ Render requires env PORT
 const PORT = process.env.PORT || 5000;
 
 // ================================
@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 5000;
 // ================================
 app.use(
   cors({
-    origin: "*", // allow Vercel & other devices
+    origin: "*",
     methods: ["GET"],
   })
 );
@@ -32,14 +32,24 @@ app.use(
 app.use(express.json());
 
 // ================================
-// LOAD DATA (ONCE AT STARTUP)
+// LOAD DATA (SAFE)
 // ================================
 
 // 🔹 HISTORICAL FIRE DATA
-const fireData = require("./data/fires_with_location.json");
+let fireData = [];
+try {
+  fireData = require("./data/fires_with_location.json");
+} catch (err) {
+  console.error("❌ Failed to load fires_with_location.json", err);
+}
 
 // 🔹 DISTRICT RISK SUMMARY
-const districtRisk = require("./data/district_risk.json");
+let districtRisk = {};
+try {
+  districtRisk = require("./data/district_risk.json");
+} catch (err) {
+  console.error("❌ Failed to load district_risk.json", err);
+}
 
 // 🔹 REAL-TIME FIRMS DATA
 let realtimeFires = [];
@@ -50,18 +60,29 @@ try {
 }
 
 // 🔹 DISTRICT BOUNDARIES
-const districtsGeoJSON = JSON.parse(
-  fs.readFileSync(
-    path.join(__dirname, "data", "india_districts.geojson"),
-    "utf8"
-  )
-);
+let districtsGeoJSON = {};
+try {
+  districtsGeoJSON = JSON.parse(
+    fs.readFileSync(
+      path.join(__dirname, "data", "india_districts.geojson"),
+      "utf8"
+    )
+  );
+} catch (err) {
+  console.error("❌ Failed to load india_districts.geojson", err);
+}
 
 // ================================
-// GEMINI AI SETUP
+// GEMINI AI SETUP (SAFE)
 // ================================
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+let geminiModel = null;
+
+if (process.env.GEMINI_API_KEY) {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+} else {
+  console.warn("⚠️ GEMINI_API_KEY not set. AI route will be disabled.");
+}
 
 // ================================
 // CONFIG
@@ -72,9 +93,9 @@ const MAX_FIRES = 300;
 // ROUTES
 // ================================
 
-// 🔹 HEALTH CHECK
+// 🔹 HEALTH CHECK (MANDATORY FOR RENDER)
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
     status: "OK",
     message: "🔥 Forest Fire Monitoring Backend is running",
   });
@@ -147,6 +168,12 @@ app.get("/api/predict/:district", (req, res) => {
 
 // 🤖 GEMINI AI (POPUP)
 app.get("/api/ai/predict/:district", async (req, res) => {
+  if (!geminiModel) {
+    return res.status(503).json({
+      error: "AI service unavailable (missing API key)",
+    });
+  }
+
   try {
     const districtName = req.params.district.toLowerCase();
     const data = districtRisk[districtName];
@@ -172,7 +199,6 @@ Respond ONLY in valid JSON:
 `;
 
     const result = await geminiModel.generateContent(prompt);
-
     const aiPrediction = JSON.parse(result.response.text());
 
     res.json({

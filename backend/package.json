@@ -1,16 +1,15 @@
 {
-  "name": "backend",
+  "name": "forest-fire-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "Forest Fire Monitoring & Risk Analysis Backend",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@turf/turf": "^7.3.1",
