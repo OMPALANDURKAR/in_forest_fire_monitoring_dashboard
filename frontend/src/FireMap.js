@@ -10,9 +10,10 @@ import { useEffect, useMemo, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import "./styles/firemap.css";
 import useDebounce from "./hooks/useDebounce";
+import DistrictPopup from "./components/DistrictPopup";
 
 /* ===============================
-   BACKEND BASE URL (BUILD-TIME)
+   BACKEND BASE URL
 ================================ */
 const API_BASE =
   process.env.REACT_APP_API_URL ||
@@ -40,7 +41,8 @@ const DistrictSearchHandler = ({
   districtGeo,
   districtRisk,
   searchDistrict,
-  setSelectedDistrict
+  setSelectedDistrict,
+  setPopupPosition
 }) => {
   const map = useMap();
 
@@ -59,9 +61,7 @@ const DistrictSearchHandler = ({
             ([lng, lat]) => [lat, lng]
           );
           map.fitBounds(bounds, { padding: [40, 40] });
-        } catch {
-          /* ignore invalid geometry */
-        }
+        } catch {}
 
         const info = districtRisk[target];
         if (info) {
@@ -71,11 +71,15 @@ const DistrictSearchHandler = ({
             fireCount: info.fire_count,
             risk: info.risk
           });
+
+          map.once("moveend", () => {
+            setPopupPosition(map.getCenter());
+          });
         }
         break;
       }
     }
-  }, [searchDistrict, districtGeo, districtRisk, map, setSelectedDistrict]);
+  }, [searchDistrict, districtGeo, districtRisk, map, setSelectedDistrict, setPopupPosition]);
 
   return null;
 };
@@ -95,6 +99,7 @@ const FireMap = ({
   const [districtRisk, setDistrictRisk] = useState({});
   const [basemap, setBasemap] = useState("satellite");
   const [dataMode, setDataMode] = useState("historical");
+  const [popupPosition, setPopupPosition] = useState(null);
 
   const debouncedSearch = useDebounce(searchDistrict, 500);
 
@@ -120,75 +125,47 @@ const FireMap = ({
      FETCH FIRE DATA
   ================================ */
   useEffect(() => {
-    if (!API_BASE) return;
-
-    const controller = new AbortController();
     const url =
       dataMode === "historical"
         ? `${API_BASE}/api/fires`
         : `${API_BASE}/api/fires-realtime`;
 
-    fetch(url, { signal: controller.signal })
-      .then(res => {
-        if (!res.ok) throw new Error("Fire API failed");
-        return res.json();
-      })
+    fetch(url)
+      .then(res => res.json())
       .then(data => setFires(Array.isArray(data) ? data : []))
-      .catch(err => {
-        if (err.name !== "AbortError") {
-          console.error("❌ Fire fetch error:", err);
-          setFires([]);
-        }
-      });
-
-    return () => controller.abort();
+      .catch(() => setFires([]));
   }, [dataMode]);
 
   /* ===============================
      FETCH STATIC DATA
   ================================ */
   useEffect(() => {
-    if (!API_BASE) return;
-
-    const controller = new AbortController();
-
-    fetch(`${API_BASE}/api/districts`, { signal: controller.signal })
+    fetch(`${API_BASE}/api/districts`)
       .then(res => res.json())
-      .then(setDistrictGeo)
-      .catch(() => setDistrictGeo(null));
+      .then(setDistrictGeo);
 
-    fetch(`${API_BASE}/api/district-risk`, { signal: controller.signal })
+    fetch(`${API_BASE}/api/district-risk`)
       .then(res => res.json())
-      .then(setDistrictRisk)
-      .catch(() => setDistrictRisk({}));
-
-    return () => controller.abort();
+      .then(setDistrictRisk);
   }, []);
 
   /* ===============================
      FILTERS
   ================================ */
-  const riskFilteredFires = useMemo(() => {
+  const finalFires = useMemo(() => {
     return fires.filter(f => {
       if (f.brightness > 350 && !riskFilter.high) return false;
       if (f.brightness >= 300 && f.brightness <= 350 && !riskFilter.medium)
         return false;
       if (f.brightness < 300 && !riskFilter.low) return false;
+
+      if (dateFrom && dateTo) {
+        const d = new Date(f.acq_date);
+        return d >= new Date(dateFrom) && d <= new Date(dateTo);
+      }
       return true;
     });
-  }, [fires, riskFilter]);
-
-  const finalFires = useMemo(() => {
-    if (!dateFrom || !dateTo) return riskFilteredFires;
-
-    const from = new Date(dateFrom);
-    const to = new Date(dateTo);
-
-    return riskFilteredFires.filter(f => {
-      const d = new Date(f.acq_date);
-      return d >= from && d <= to;
-    });
-  }, [riskFilteredFires, dateFrom, dateTo]);
+  }, [fires, riskFilter, dateFrom, dateTo]);
 
   /* ===============================
      COLOR LOGIC
@@ -199,7 +176,7 @@ const FireMap = ({
   return (
     <div className="map-container">
 
-      {/* DATA MODE TOGGLE */}
+      {/* TOGGLES */}
       <div className="data-toggle">
         <button
           className={dataMode === "historical" ? "active" : ""}
@@ -215,7 +192,6 @@ const FireMap = ({
         </button>
       </div>
 
-      {/* BASEMAP TOGGLE */}
       <div className="basemap-toggle">
         <button
           className={basemap === "street" ? "active" : ""}
@@ -247,46 +223,41 @@ const FireMap = ({
               const info = districtRisk[key];
 
               if (info) {
-                layer.on("click", () => {
+                layer.on("click", (e) => {
                   setSelectedDistrict({
                     district: name,
                     state: info.state,
                     fireCount: info.fire_count,
                     risk: info.risk
                   });
+                  setPopupPosition(e.latlng);
                 });
               }
             }}
           />
         )}
 
-        {finalFires.map((f, idx) => {
-          const lat = Number(f.latitude);
-          const lon = Number(f.longitude);
-          if (isNaN(lat) || isNaN(lon)) return null;
-
-          return (
-            <CircleMarker
-              key={idx}
-              center={[lat, lon]}
-              radius={f.brightness > 350 ? 4 : 3}
-              pathOptions={{
-                color: fireColor(f.brightness),
-                fillColor: fireColor(f.brightness),
-                fillOpacity: 0.7,
-                weight: 0
-              }}
-            >
-              <Popup>
-                <div style={{ fontSize: "13px" }}>
-                  <div><strong>District:</strong> {f.district || "N/A"}</div>
-                  <div><strong>Risk:</strong> {getFireRisk(f.brightness)}</div>
-                  <div><strong>Date:</strong> {f.acq_date}</div>
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
+        {finalFires.map((f, idx) => (
+          <CircleMarker
+            key={idx}
+            center={[+f.latitude, +f.longitude]}
+            radius={f.brightness > 350 ? 4 : 3}
+            pathOptions={{
+              color: fireColor(f.brightness),
+              fillColor: fireColor(f.brightness),
+              fillOpacity: 0.7,
+              weight: 0
+            }}
+          >
+            <Popup>
+              <div style={{ fontSize: "13px" }}>
+                <div><strong>District:</strong> {f.district || "N/A"}</div>
+                <div><strong>Risk:</strong> {getFireRisk(f.brightness)}</div>
+                <div><strong>Date:</strong> {f.acq_date}</div>
+              </div>
+            </Popup>
+          </CircleMarker>
+        ))}
 
         {districtGeo && (
           <DistrictSearchHandler
@@ -294,6 +265,15 @@ const FireMap = ({
             districtRisk={districtRisk}
             searchDistrict={debouncedSearch}
             setSelectedDistrict={setSelectedDistrict}
+            setPopupPosition={setPopupPosition}
+          />
+        )}
+
+        {popupPosition && (
+          <DistrictPopup
+            district={null}
+            position={popupPosition}
+            onClose={() => setPopupPosition(null)}
           />
         )}
       </MapContainer>
