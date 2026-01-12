@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Popup } from "react-leaflet";
 
 /* ===============================
-   BACKEND BASE URL (BUILD-TIME)
+   BACKEND BASE URL
 ================================ */
 const API_BASE =
   process.env.REACT_APP_API_URL ||
@@ -17,10 +17,6 @@ const DistrictPopup = ({ district, position, onClose }) => {
   ================================ */
   useEffect(() => {
     if (!district?.district) return;
-    if (!API_BASE) {
-      console.error("❌ API base URL missing");
-      return;
-    }
 
     const controller = new AbortController();
     setLoading(true);
@@ -50,11 +46,8 @@ const DistrictPopup = ({ district, position, onClose }) => {
 
   if (!district || !position) return null;
 
-  /* ===============================
-     RENDER
-  ================================ */
   return (
-    <Popup position={position} closeButton={false}>
+    <Popup position={position} closeButton={false} autoPan>
       <div className="district-popup-content">
         <button className="close-btn" onClick={onClose}>✖</button>
 

@@ -205,13 +205,13 @@ html, body, #root {
    DATE RANGE
 ================================ */
 .date-group {
-  display: flex;
-  align-items: center;
+  display: left;
+  align-items: left;
   gap: 0.5rem;
 }
 
 .date-separator {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
 }
 
@@ -329,7 +329,7 @@ html, body, #root {
 .legend {
   position: absolute;
   bottom: 1.5rem;
-  right: 360px;
+  right: 1000px;
   background: var(--bg-panel);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border-light);

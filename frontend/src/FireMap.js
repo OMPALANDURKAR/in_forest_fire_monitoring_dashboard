@@ -88,7 +88,6 @@ const DistrictSearchHandler = ({
    MAIN MAP COMPONENT
 ================================ */
 const FireMap = ({
-  setSelectedDistrict,
   searchDistrict,
   riskFilter,
   dateFrom,
@@ -99,6 +98,8 @@ const FireMap = ({
   const [districtRisk, setDistrictRisk] = useState({});
   const [basemap, setBasemap] = useState("satellite");
   const [dataMode, setDataMode] = useState("historical");
+
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [popupPosition, setPopupPosition] = useState(null);
 
   const debouncedSearch = useDebounce(searchDistrict, 500);
@@ -167,9 +168,6 @@ const FireMap = ({
     });
   }, [fires, riskFilter, dateFrom, dateTo]);
 
-  /* ===============================
-     COLOR LOGIC
-  ================================ */
   const fireColor = (b) =>
     b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
 
@@ -269,11 +267,14 @@ const FireMap = ({
           />
         )}
 
-        {popupPosition && (
+        {selectedDistrict && popupPosition && (
           <DistrictPopup
-            district={null}
+            district={selectedDistrict}
             position={popupPosition}
-            onClose={() => setPopupPosition(null)}
+            onClose={() => {
+              setSelectedDistrict(null);
+              setPopupPosition(null);
+            }}
           />
         )}
       </MapContainer>
