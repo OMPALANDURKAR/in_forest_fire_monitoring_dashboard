@@ -302,11 +302,38 @@ html, body, #root {
 /* ================================
    LIVE FIRE LIST
 ================================ */
+/* ================================
+   LIVE FIRE LIST (SECTION 6)
+   SCROLLABLE
+================================ */
 .fire-list {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+
+  max-height: 420px;        /* FIXED HEIGHT FOR SCROLL */
+  overflow-y: auto;         /* ENABLE VERTICAL SCROLL */
+  padding-right: 6px;
 }
+
+/* Custom scrollbar (Bioluminescent Zen) */
+.fire-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.fire-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.fire-list::-webkit-scrollbar-thumb {
+  background: rgba(45, 212, 191, 0.4); /* Electric Mint */
+  border-radius: 6px;
+}
+
+.fire-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(45, 212, 191, 0.65);
+}
+
 
 .fire-item {
   background: var(--bg-input);
@@ -426,5 +453,217 @@ html, body, #root {
 
   .legend {
     right: 1.5rem;
+  }
+}
+/* ================================
+   THEME VARIABLES
+================================ */
+:root {
+  --bg-app: #0f172a;
+  --bg-panel: rgba(15, 23, 42, 0.9);
+  --bg-soft: rgba(30, 41, 59, 0.7);
+  --bg-input: #1e293b;
+
+  --border-light: #334155;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --risk-high: #ef4444;
+  --risk-medium: #f59e0b;
+  --risk-low: #22c55e;
+
+  --shadow-soft: 0 8px 30px rgba(0,0,0,0.35);
+}
+
+/* ================================
+   DASHBOARD LAYOUT
+================================ */
+.dashboard-container {
+  height: 100vh;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  overflow: hidden;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  height: calc(100vh - 64px);
+}
+
+/* ================================
+   ANALYTICS PANEL
+================================ */
+.analytics-section {
+  background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  border-left: 1px solid var(--border-light);
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* ================================
+   HEADER
+================================ */
+.analytics-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.subtext {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* ================================
+   SUMMARY CARDS (SECTION 5)
+================================ */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.7rem;
+}
+
+.stat-card {
+  background: var(--bg-soft);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 0.8rem;
+  transition: transform 0.15s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+}
+
+.risk-high .stat-value { color: var(--risk-high); }
+.risk-medium .stat-value { color: var(--risk-medium); }
+.risk-low .stat-value { color: var(--risk-low); }
+
+/* ================================
+   SECTION 6 – SCROLL CONTAINER
+================================ */
+.fire-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-right: 4px;
+}
+
+.fire-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.fire-list::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+/* ================================
+   FIRE ITEM / STATUS CARD
+================================ */
+.fire-item {
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 0.9rem;
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  animation: fadeIn 0.25s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================
+   RISK BADGE
+================================ */
+.fire-risk {
+  min-width: 58px;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+}
+
+.fire-risk.risk-high {
+  background: rgba(239,68,68,0.2);
+  color: var(--risk-high);
+}
+
+.fire-risk.risk-medium {
+  background: rgba(245,158,11,0.2);
+  color: var(--risk-medium);
+}
+
+.fire-risk.risk-low {
+  background: rgba(34,197,94,0.2);
+  color: var(--risk-low);
+}
+
+/* ================================
+   FIRE DETAILS
+================================ */
+.fire-details {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.fire-details strong {
+  color: var(--text-primary);
+}
+
+.muted {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+}
+
+/* ================================
+   LOADING / EMPTY STATES
+================================ */
+.loading,
+.empty {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 1.2rem 0;
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+@media (max-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-section {
+    display: none;
   }
 }

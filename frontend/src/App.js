@@ -9,7 +9,7 @@ import Analytics from "./components/Analytics";
 import FireMap from "./FireMap";
 
 /* ===============================
-   BACKEND BASE URL (BUILD-TIME)
+   BACKEND BASE URL
 ================================ */
 const API_BASE =
   process.env.REACT_APP_API_URL ||
@@ -20,37 +20,39 @@ function App() {
      GLOBAL STATES
   ================================ */
 
-  // Search & filters
+  // 🔍 Search input
   const [searchDistrict, setSearchDistrict] = useState("");
 
+  // 🎚 Risk filters
   const [riskFilter, setRiskFilter] = useState({
     high: true,
     medium: true,
     low: true,
   });
 
+  // 📅 Date filters
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // Selected district
+  // 🗺️ Map-selected district
   const [selectedDistrict, setSelectedDistrict] = useState(null);
 
-  // 🔥 Real-time FIRMS
+  // 🔥 Sidebar real-time info
   const [realtimeInfo, setRealtimeInfo] = useState(null);
   const [loadingRealtime, setLoadingRealtime] = useState(false);
 
-  // 🔮 Future risk prediction
+  // 🔮 Sidebar future risk
   const [futureRisk, setFutureRisk] = useState(null);
   const [loadingFuture, setLoadingFuture] = useState(false);
 
   /* ===============================
-     ACTIVE DISTRICT
+     ACTIVE DISTRICT (SINGLE SOURCE)
   ================================ */
   const activeDistrict =
     selectedDistrict?.district || searchDistrict;
 
   /* ===============================
-     REAL-TIME FIRE STATUS
+     REAL-TIME FIRE STATUS (SIDEBAR)
   ================================ */
   useEffect(() => {
     if (!activeDistrict || !API_BASE) {
@@ -70,9 +72,7 @@ function App() {
         return res.json();
       })
       .then(data => {
-        setRealtimeInfo(
-          data && data.count > 0 ? data : null
-        );
+        setRealtimeInfo(data && data.count > 0 ? data : null);
       })
       .catch(err => {
         if (err.name !== "AbortError") {
@@ -86,7 +86,7 @@ function App() {
   }, [activeDistrict]);
 
   /* ===============================
-     FUTURE RISK PREDICTION
+     FUTURE RISK PREDICTION (SIDEBAR)
   ================================ */
   useEffect(() => {
     if (!activeDistrict || !API_BASE) {
@@ -152,8 +152,11 @@ function App() {
           setSelectedDistrict={setSelectedDistrict}
         />
 
-        {/* RIGHT PANEL */}
-        <Analytics selectedDistrict={selectedDistrict} />
+        {/* RIGHT PANEL ✅ FINAL FIX */}
+        <Analytics
+          selectedDistrict={selectedDistrict}
+          searchDistrict={searchDistrict}
+        />
       </div>
     </div>
   );

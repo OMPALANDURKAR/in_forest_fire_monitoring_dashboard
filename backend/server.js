@@ -9,6 +9,7 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const turf = require("@turf/turf");
 
 // Gemini AI
 const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -35,10 +36,10 @@ app.use(
 app.use(express.json());
 
 // ================================
-// LOAD DATA (SAFE)
+// LOAD DATA
 // ================================
 
-// 🔹 HISTORICAL FIRE DATA
+// 🔹 HISTORICAL FIRE DATA (already mapped)
 let fireData = [];
 try {
   fireData = require("./data/fires_with_location.json");
@@ -54,7 +55,7 @@ try {
   console.error("❌ Failed to load district_risk.json", err);
 }
 
-// 🔹 REAL-TIME FIRMS DATA
+// 🔹 REAL-TIME FIRMS DATA (RAW)
 let realtimeFires = [];
 try {
   realtimeFires = require("./data/fires_realtime.json");
@@ -76,7 +77,7 @@ try {
 }
 
 // ================================
-// GEMINI AI SETUP (SAFE)
+// GEMINI AI SETUP
 // ================================
 let geminiModel = null;
 
@@ -91,6 +92,31 @@ if (process.env.GEMINI_API_KEY) {
 // CONFIG
 // ================================
 const MAX_FIRES = 300;
+
+// ================================
+// 🔑 POINT → DISTRICT MAPPER (NEW)
+// ================================
+const getDistrictFromPoint = (lat, lon) => {
+  const point = turf.point([lon, lat]);
+
+  for (const feature of districtsGeoJSON.features) {
+    if (turf.booleanPointInPolygon(point, feature)) {
+      return {
+        district:
+          feature.properties.DISTRICT ||
+          feature.properties.NAME_3 ||
+          feature.properties.NAME_2 ||
+          "Unknown",
+        state:
+          feature.properties.STATE ||
+          feature.properties.NAME_1 ||
+          "Unknown",
+      };
+    }
+  }
+
+  return { district: "Unknown", state: "Unknown" };
+};
 
 // ================================
 // ROUTES
@@ -119,18 +145,35 @@ app.get("/api/districts", (req, res) => {
   res.json(districtsGeoJSON);
 });
 
-// 🔴 REAL-TIME FIRMS (ALL INDIA)
+// 🔴 REAL-TIME FIRMS (ALL INDIA) — ✅ MAPPED
 app.get("/api/fires-realtime", (req, res) => {
-  res.json(realtimeFires || []);
+  const enriched = realtimeFires.map(f => {
+    const lat = Number(f.latitude);
+    const lon = Number(f.longitude);
+
+    const location = getDistrictFromPoint(lat, lon);
+
+    return {
+      ...f,
+      district: location.district,
+      state: location.state,
+    };
+  });
+
+  res.json(enriched);
 });
 
 // 🔴 REAL-TIME FIRMS (DISTRICT)
 app.get("/api/realtime/:district", (req, res) => {
   const district = req.params.district.toLowerCase();
 
-  const matches = realtimeFires.filter(
-    f => f.district && f.district.toLowerCase() === district
-  );
+  const matches = realtimeFires.filter(f => {
+    const location = getDistrictFromPoint(
+      Number(f.latitude),
+      Number(f.longitude)
+    );
+    return location.district.toLowerCase() === district;
+  });
 
   if (!matches.length) return res.json(null);
 
@@ -165,21 +208,17 @@ app.get("/api/predict/:district", (req, res) => {
   });
 });
 
-// 🤖 GEMINI AI (POPUP)
+// 🤖 GEMINI AI (OPTIONAL)
 app.get("/api/ai/predict/:district", async (req, res) => {
   if (!geminiModel) {
-    return res.status(503).json({
-      error: "AI service unavailable",
-    });
+    return res.status(503).json({ error: "AI service unavailable" });
   }
 
   try {
     const districtName = req.params.district.toLowerCase();
     const data = districtRisk[districtName];
 
-    if (!data) {
-      return res.status(404).json({ error: "District not found" });
-    }
+    if (!data) return res.status(404).json({ error: "District not found" });
 
     const prompt = `
 You are an environmental risk analysis AI.
@@ -187,14 +226,6 @@ You are an environmental risk analysis AI.
 District: ${districtName}
 Total Fires: ${data.count}
 Risk Level: ${data.risk}
-
-Respond ONLY in valid JSON:
-{
-  "predictedRisk": "Low | Medium | High",
-  "trend": "Increasing | Stable | Decreasing",
-  "alert": true or false,
-  "explanation": "short explanation"
-}
 `;
 
     const result = await geminiModel.generateContent(prompt);
@@ -211,7 +242,7 @@ Respond ONLY in valid JSON:
   }
 });
 
-// 🔻 404 HANDLER (IMPORTANT)
+// 🔻 404 HANDLER
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
