@@ -10,7 +10,6 @@ import { useEffect, useMemo, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import "./styles/firemap.css";
 import useDebounce from "./hooks/useDebounce";
-import DistrictPopup from "./components/DistrictPopup";
 
 /* ===============================
    BACKEND BASE URL
@@ -26,7 +25,7 @@ const normalizeDistrict = (name) =>
   name ? name.toLowerCase().replace(" district", "").trim() : null;
 
 const getDistrictName = (p) =>
-  p.DISTRICT || p.district || p.NAME_3 || p.NAME_2 || p.dtname || null;
+  p?.DISTRICT || p?.district || p?.NAME_3 || p?.NAME_2 || p?.dtname || null;
 
 const getFireRisk = (brightness) => {
   if (brightness > 350) return "High";
@@ -42,7 +41,6 @@ const DistrictSearchHandler = ({
   districtRisk,
   searchDistrict,
   setSelectedDistrict,
-  setPopupPosition
 }) => {
   const map = useMap();
 
@@ -71,15 +69,11 @@ const DistrictSearchHandler = ({
             fireCount: info.fire_count,
             risk: info.risk
           });
-
-          map.once("moveend", () => {
-            setPopupPosition(map.getCenter());
-          });
         }
         break;
       }
     }
-  }, [searchDistrict, districtGeo, districtRisk, map, setSelectedDistrict, setPopupPosition]);
+  }, [searchDistrict, districtGeo, districtRisk, map, setSelectedDistrict]);
 
   return null;
 };
@@ -91,7 +85,8 @@ const FireMap = ({
   searchDistrict,
   riskFilter,
   dateFrom,
-  dateTo
+  dateTo,
+  setSelectedDistrict
 }) => {
   const [fires, setFires] = useState([]);
   const [districtGeo, setDistrictGeo] = useState(null);
@@ -99,8 +94,8 @@ const FireMap = ({
   const [basemap, setBasemap] = useState("satellite");
   const [dataMode, setDataMode] = useState("historical");
 
-  const [selectedDistrict, setSelectedDistrict] = useState(null);
-  const [popupPosition, setPopupPosition] = useState(null);
+  // 🔑 POPUP CONTROL STATE
+  const [activePopup, setActivePopup] = useState(null);
 
   const debouncedSearch = useDebounce(searchDistrict, 500);
 
@@ -151,7 +146,7 @@ const FireMap = ({
   }, []);
 
   /* ===============================
-     FILTERS
+     FILTER FIRES
   ================================ */
   const finalFires = useMemo(() => {
     return fires.filter(f => {
@@ -171,9 +166,11 @@ const FireMap = ({
   const fireColor = (b) =>
     b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
 
+  /* ===============================
+     RENDER
+  ================================ */
   return (
     <div className="map-container">
-
       {/* TOGGLES */}
       <div className="data-toggle">
         <button
@@ -205,80 +202,68 @@ const FireMap = ({
         </button>
       </div>
 
-      <MapContainer center={[22.6, 79]} zoom={5} preferCanvas>
+      <MapContainer center={[22.6, 79]} zoom={5}>
         <TileLayer
           url={tileLayers[basemap].url}
           attribution={tileLayers[basemap].attribution}
         />
 
+        {/* DISTRICT BOUNDARIES */}
         {districtGeo && (
           <GeoJSON
             data={districtGeo}
             style={{ color: "#64748b", weight: 0.6, fillOpacity: 0 }}
-            onEachFeature={(feature, layer) => {
-              const name = getDistrictName(feature.properties);
-              const key = normalizeDistrict(name);
-              const info = districtRisk[key];
-
-              if (info) {
-                layer.on("click", (e) => {
-                  setSelectedDistrict({
-                    district: name,
-                    state: info.state,
-                    fireCount: info.fire_count,
-                    risk: info.risk
-                  });
-                  setPopupPosition(e.latlng);
-                });
-              }
-            }}
           />
         )}
 
+        {/* FIRE MARKERS */}
         {finalFires.map((f, idx) => (
           <CircleMarker
             key={idx}
             center={[+f.latitude, +f.longitude]}
-            radius={f.brightness > 350 ? 4 : 3}
+            radius={4}
             pathOptions={{
               color: fireColor(f.brightness),
               fillColor: fireColor(f.brightness),
               fillOpacity: 0.7,
               weight: 0
             }}
-          >
-            <Popup>
-              <div style={{ fontSize: "13px" }}>
-                <div><strong>District:</strong> {f.district || "N/A"}</div>
-                <div><strong>Risk:</strong> {getFireRisk(f.brightness)}</div>
-                <div><strong>Date:</strong> {f.acq_date}</div>
-              </div>
-            </Popup>
-          </CircleMarker>
+            eventHandlers={{
+              click: () => {
+                setActivePopup(f); // 🔑 popup trigger
+              }
+            }}
+          />
         ))}
 
+        {/* 🔑 CONTROLLED POPUP (PRODUCTION SAFE) */}
+        {activePopup && (
+          <Popup
+            position={[+activePopup.latitude, +activePopup.longitude]}
+            onClose={() => setActivePopup(null)}
+            autoPan
+          >
+            <div style={{ fontSize: "13px" }}>
+              <div><strong>District:</strong> {activePopup.district || "N/A"}</div>
+              <div><strong>Risk:</strong> {getFireRisk(activePopup.brightness)}</div>
+              <div><strong>Date:</strong> {activePopup.acq_date}</div>
+              <div><strong>Time:</strong> {activePopup.acq_time}</div>
+            </div>
+          </Popup>
+        )}
+
+        {/* SEARCH HANDLER */}
         {districtGeo && (
           <DistrictSearchHandler
             districtGeo={districtGeo}
             districtRisk={districtRisk}
             searchDistrict={debouncedSearch}
             setSelectedDistrict={setSelectedDistrict}
-            setPopupPosition={setPopupPosition}
-          />
-        )}
-
-        {selectedDistrict && popupPosition && (
-          <DistrictPopup
-            district={selectedDistrict}
-            position={popupPosition}
-            onClose={() => {
-              setSelectedDistrict(null);
-              setPopupPosition(null);
-            }}
           />
         )}
       </MapContainer>
 
+      {/* LEGEND */}
       <div className="legend">
         <div><span className="dot red" /> High</div>
         <div><span className="dot orange" /> Medium</div>

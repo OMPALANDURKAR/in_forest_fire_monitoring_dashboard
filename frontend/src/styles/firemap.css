@@ -304,3 +304,12 @@
 .popup-section.note p {
   margin: 4px 0 0;
 }
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 1;
+}
+
+.leaflet-popup {
+  z-index: 9999 !important;
+}
