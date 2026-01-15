@@ -128,61 +128,33 @@ app.get("/api/districts", (req, res) => {
 });
 
 // 🔮 FUTURE RISK PREDICTION (HISTORICAL-BASED)
+// 🔮 AI RISK OUTLOOK (LOGIC-BASED, HISTORICAL)
 app.get("/api/predict/:district", (req, res) => {
-  loadDistrictRisk();
-
-  const district = req.params.district.toLowerCase();
-  const data = districtRisk[district];
-
-  if (!data) return res.json(null);
-
-  const historicalAvg = 10;
-  const percentage = Math.min(
-    Math.round((data.count / historicalAvg) * 100),
-    100
-  );
-
-  let level = "Low";
-  if (percentage > 70) level = "High";
-  else if (percentage > 40) level = "Medium";
-
-  res.json({
-    percentage,
-    level,
-    reason:
-      "Prediction based on historical fire frequency compared to long-term average",
-  });
-});
-// 📊 HISTORICAL SUMMARY FOR A DISTRICT (POPUP DATA)
-app.get("/api/history/:district", (req, res) => {
   loadHistoricalFires();
 
   const district = req.params.district.toLowerCase();
 
-  const fires = historicalFires.filter(
+  const count = historicalFires.filter(
     f => f.district?.toLowerCase() === district
-  );
+  ).length;
 
-  if (fires.length === 0) {
-    return res.json({
-      district,
-      totalFires: 0,
-      firstFireDate: null,
-      lastFireDate: null,
-      message: "No historical fire records found",
-    });
+  let riskLevel = "Low";
+  let riskPercentage = 20;
+
+  if (count > 80) {
+    riskLevel = "High";
+    riskPercentage = 85;
+  } else if (count > 20) {
+    riskLevel = "Medium";
+    riskPercentage = 55;
   }
-
-  const dates = fires
-    .map(f => f.acq_date)
-    .filter(Boolean)
-    .sort();
 
   res.json({
     district,
-    totalFires: fires.length,
-    firstFireDate: dates[0] || null,
-    lastFireDate: dates[dates.length - 1] || null,
+    historicalFireCount: count,
+    riskLevel,
+    riskPercentage,
+    logic: "Derived from historical fire frequency",
   });
 });
 

@@ -23,7 +23,7 @@ const SidebarFilters = ({
       </div>
 
       {/* =========================
-         REAL-TIME STATUS
+         REAL-TIME STATUS (FIRMS)
       ========================= */}
       <div className="sidebar-block status-block">
         <h4 className="block-title">Real-Time Status</h4>
@@ -32,56 +32,63 @@ const SidebarFilters = ({
           <p className="muted">Select a district</p>
         ) : loadingRealtime ? (
           <p className="muted">Checking FIRMS data…</p>
-        ) : realtimeInfo?.count > 0 ? (
+        ) : realtimeInfo?.activeFires > 0 ? (
           <>
             <div className="status-pill danger">
               🔴 Active Fires Detected
             </div>
             <p className="status-text">
-              {realtimeInfo.count} active fire(s)
+              {realtimeInfo.activeFires} active fire(s) reported
             </p>
+            <small className="muted">
+              Source: NASA FIRMS (Near Real-Time)
+            </small>
           </>
         ) : (
           <div className="status-pill safe">
-            🟢 No Active Fire Risk
+            🟢 No Active Fires Detected
           </div>
         )}
       </div>
 
       {/* =========================
-         AI RISK OUTLOOK
+         AI RISK OUTLOOK (LOGIC-BASED)
       ========================= */}
       <div className="sidebar-block ai-block">
         <h4 className="block-title">AI Risk Outlook</h4>
 
         {!searchDistrict ? (
-          <p className="muted">Search district to view risk</p>
+          <p className="muted">Search a district to view risk</p>
         ) : loadingFuture ? (
-          <p className="muted">Analyzing trends…</p>
+          <p className="muted">Analyzing historical trends…</p>
         ) : futureRisk ? (
           <>
+            {/* RISK BAR */}
             <div className="risk-meter">
               <div
-                className={`risk-fill ${futureRisk.level?.toLowerCase() || ""}`}
-                style={{ width: `${futureRisk.percentage || 0}%` }}
+                className={`risk-fill ${futureRisk.riskLevel?.toLowerCase()}`}
+                style={{ width: `${futureRisk.riskPercentage || 0}%` }}
               />
             </div>
 
+            {/* RISK SUMMARY */}
             <div className="risk-summary">
               <span className="risk-value">
-                {futureRisk.percentage || 0}%
+                {futureRisk.riskPercentage || 0}%
               </span>
               <span className="risk-label">
-                {futureRisk.level || "Unknown"} Risk
+                {futureRisk.riskLevel || "Unknown"} Risk
               </span>
             </div>
 
+            {/* EXPLANATION */}
             <p className="ai-reason">
-              {futureRisk.reason || "No explanation available"}
+              {futureRisk.logic ||
+                "Risk derived from historical fire frequency"}
             </p>
           </>
         ) : (
-          <p className="muted">Prediction unavailable</p>
+          <p className="muted">Risk data unavailable</p>
         )}
       </div>
 

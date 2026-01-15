@@ -26,7 +26,7 @@ const getDistrictName = (p) =>
   p?.DISTRICT || p?.district || p?.NAME_3 || p?.NAME_2 || p?.dtname || null;
 
 /* ===============================
-   MAP FOCUS HANDLER (SAFE)
+   MAP FOCUS HANDLER
 ================================ */
 const FocusDistrict = ({ districtGeo, searchDistrict }) => {
   const map = useMap();
@@ -48,9 +48,7 @@ const FocusDistrict = ({ districtGeo, searchDistrict }) => {
         ([lng, lat]) => [lat, lng]
       );
       map.fitBounds(bounds, { padding: [40, 40] });
-    } catch {
-      // ignore geometry errors
-    }
+    } catch {}
   }, [searchDistrict, districtGeo, map]);
 
   return null;
@@ -59,17 +57,16 @@ const FocusDistrict = ({ districtGeo, searchDistrict }) => {
 /* ===============================
    MAIN MAP COMPONENT
 ================================ */
-const FireMap = ({
-  searchDistrict,
-  riskFilter,
-  dateFrom,
-  dateTo,
-  setSelectedDistrict
-}) => {
+const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
   const [fires, setFires] = useState([]);
   const [districtGeo, setDistrictGeo] = useState(null);
   const [basemap, setBasemap] = useState("satellite");
   const [dataMode, setDataMode] = useState("historical");
+
+  /* 🔹 POPUP STATE */
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupData, setPopupData] = useState(null);
+  const [popupDistrict, setPopupDistrict] = useState(null);
 
   /* ===============================
      TILE LAYERS
@@ -90,7 +87,7 @@ const FireMap = ({
   );
 
   /* ===============================
-     FETCH FIRE DATA (FAST)
+     FETCH FIRE DATA
   ================================ */
   useEffect(() => {
     const url =
@@ -105,7 +102,7 @@ const FireMap = ({
   }, [dataMode]);
 
   /* ===============================
-     FETCH DISTRICT GEOJSON (ONCE)
+     FETCH DISTRICTS
   ================================ */
   useEffect(() => {
     fetch(`${API_BASE}/api/districts`)
@@ -115,7 +112,34 @@ const FireMap = ({
   }, []);
 
   /* ===============================
-     FILTER + HARD LIMIT (CRITICAL)
+     FETCH HISTORY (POPUP)
+  ================================ */
+  const fetchDistrictHistory = async (district) => {
+    if (!district) return;
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/history/${district.toLowerCase()}`
+      );
+      const data = await res.json();
+
+      setPopupDistrict(district);
+      setPopupData(data);
+      setShowPopup(true);
+    } catch {
+      setShowPopup(false);
+    }
+  };
+
+  /* 🔹 SEARCH TRIGGER */
+  useEffect(() => {
+    if (searchDistrict) {
+      fetchDistrictHistory(searchDistrict);
+    }
+  }, [searchDistrict]);
+
+  /* ===============================
+     FILTER FIRES
   ================================ */
   const finalFires = useMemo(() => {
     return fires
@@ -131,7 +155,7 @@ const FireMap = ({
         }
         return true;
       })
-      .slice(0, 400); // 🚀 HARD LIMIT (VERY IMPORTANT)
+      .slice(0, 400);
   }, [fires, riskFilter, dateFrom, dateTo]);
 
   const fireColor = (b) =>
@@ -142,7 +166,7 @@ const FireMap = ({
   ================================ */
   return (
     <div className="map-container">
-      {/* DATA MODE TOGGLE */}
+      {/* MODE TOGGLE */}
       <div className="data-toggle">
         <button
           className={dataMode === "historical" ? "active" : ""}
@@ -174,25 +198,27 @@ const FireMap = ({
         </button>
       </div>
 
-      <MapContainer
-        center={[22.6, 79]}
-        zoom={5}
-        preferCanvas   // 🔥 HUGE PERFORMANCE BOOST
-      >
+      <MapContainer center={[22.6, 79]} zoom={5} preferCanvas>
         <TileLayer
           url={tileLayers[basemap].url}
           attribution={tileLayers[basemap].attribution}
         />
 
-        {/* DISTRICT BOUNDARIES */}
+        {/* DISTRICTS (CLICK ENABLED) */}
         {districtGeo && (
           <GeoJSON
             data={districtGeo}
             style={{ color: "#64748b", weight: 0.6, fillOpacity: 0 }}
+            onEachFeature={(feature, layer) => {
+              layer.on("click", () => {
+                const name = getDistrictName(feature.properties);
+                if (name) fetchDistrictHistory(name);
+              });
+            }}
           />
         )}
 
-        {/* FIRE MARKERS */}
+        {/* FIRE POINTS */}
         {finalFires.map((f, idx) => (
           <CircleMarker
             key={idx}
@@ -207,7 +233,7 @@ const FireMap = ({
           />
         ))}
 
-        {/* SEARCH → MAP FOCUS */}
+        {/* SEARCH → FOCUS */}
         {districtGeo && searchDistrict && (
           <FocusDistrict
             districtGeo={districtGeo}
@@ -215,6 +241,17 @@ const FireMap = ({
           />
         )}
       </MapContainer>
+
+      {/* POPUP */}
+      {showPopup && popupData && (
+        <div className="history-popup">
+          <h3>{popupDistrict}</h3>
+          <p><b>Total Historical Fires:</b> {popupData.totalFires}</p>
+          <p><b>First Fire:</b> {popupData.firstFireDate || "N/A"}</p>
+          <p><b>Last Fire:</b> {popupData.lastFireDate || "N/A"}</p>
+          <button onClick={() => setShowPopup(false)}>Close</button>
+        </div>
+      )}
 
       {/* LEGEND */}
       <div className="legend">
