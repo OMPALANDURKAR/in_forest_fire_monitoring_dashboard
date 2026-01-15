@@ -23,9 +23,10 @@ const PORT = process.env.PORT || 10000;
 // ================================
 app.use(cors({ origin: "*", methods: ["GET"] }));
 app.use(express.json());
+app.use(compression());
 
 // ================================
-// 🔥 LIGHTWEIGHT HEALTH CHECK (MUST BE FIRST)
+// 🔥 LIGHTWEIGHT HEALTH CHECK
 // ================================
 app.get("/", (req, res) => {
   res.status(200).send("OK");
@@ -43,10 +44,9 @@ let districtsGeoJSON = null;
 // CONFIG
 // ================================
 const MAX_HISTORICAL_FIRES = 300;
-const MAX_REALTIME_FIRES = 500;
 
 // ================================
-// HELPER LOADERS (SAFE + LAZY)
+// HELPER LOADERS
 // ================================
 function loadHistoricalFires() {
   if (!historicalFires) {
@@ -87,16 +87,15 @@ function loadDistrictsGeoJSON() {
 // ROUTES
 // ================================
 
-// 🔥 HISTORICAL FIRE DATA
+// 🔥 HISTORICAL FIRE DATA (MAP + ANALYTICS)
 app.get("/api/fires", (req, res) => {
   loadHistoricalFires();
   res.json(historicalFires.slice(0, MAX_HISTORICAL_FIRES));
 });
 
-// 🔴 REALTIME FIRE DATA
-// 🔴 REAL-TIME STATUS (FIRMS NRT ONLY)
+// 🔴 REAL-TIME STATUS (FIRMS NRT ONLY) ✅ FIXED
 app.get("/api/realtime/:district", (req, res) => {
-  loadRealtimeFires(); // ✅ FIRMS NRT data ONLY
+  loadRealtimeFires();
 
   const district = req.params.district.toLowerCase();
 
@@ -116,7 +115,6 @@ app.get("/api/realtime/:district", (req, res) => {
   });
 });
 
-
 // 📊 DISTRICT RISK SUMMARY
 app.get("/api/district-risk", (req, res) => {
   loadDistrictRisk();
@@ -129,24 +127,7 @@ app.get("/api/districts", (req, res) => {
   res.json(districtsGeoJSON);
 });
 
-// 🔴 DISTRICT REALTIME STATUS
-app.get("/api/realtime/:district", (req, res) => {
-  loadHistoricalFires();
-
-  const district = req.params.district.toLowerCase();
-  const matches = historicalFires.filter(
-    f => f.district?.toLowerCase() === district
-  );
-
-  if (!matches.length) return res.json(null);
-
-  res.json({
-    count: matches.length,
-    status: "Fire activity detected",
-  });
-});
-
-// 🔮 FUTURE RISK PREDICTION
+// 🔮 FUTURE RISK PREDICTION (HISTORICAL-BASED)
 app.get("/api/predict/:district", (req, res) => {
   loadDistrictRisk();
 
