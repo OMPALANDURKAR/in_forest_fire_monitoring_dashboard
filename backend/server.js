@@ -122,11 +122,6 @@ app.get("/api/realtime/:district", (req, res) => {
     lastUpdated: new Date().toISOString(),
   });
 });
-// 🔴 REAL-TIME FIRES (FIRMS NRT - ALL INDIA)
-app.get("/api/fires-realtime", (req, res) => {
-  loadRealtimeFires();
-  res.json(realtimeFires);
-});
 
 // 📊 DISTRICT RISK SUMMARY
 app.get("/api/district-risk", (req, res) => {
