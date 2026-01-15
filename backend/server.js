@@ -165,3 +165,33 @@ app.use((req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
 });
+// 📊 HISTORICAL SUMMARY FOR A DISTRICT (POPUP DATA)
+app.get("/api/history/:district", (req, res) => {
+  loadHistoricalFires();
+
+  const district = req.params.district.toLowerCase();
+
+  const fires = historicalFires.filter(
+    f => f.district?.toLowerCase() === district
+  );
+
+  if (fires.length === 0) {
+    return res.json({
+      district,
+      totalFires: 0,
+      firstFireDate: null,
+      lastFireDate: null,
+      message: "No historical fire records found",
+    });
+  }
+
+  // Assuming fires are already sorted by date (if not, this still works safely)
+  const dates = fires.map(f => f.acq_date).sort();
+
+  res.json({
+    district,
+    totalFires: fires.length,
+    firstFireDate: dates[0],
+    lastFireDate: dates[dates.length - 1],
+  });
+});
