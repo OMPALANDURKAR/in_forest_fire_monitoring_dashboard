@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import "./styles/firemap.css";
 import "./styles/dashboard.css";
-
+import DistrictPopup from "./components/DistrictPopup";
 import Header from "./components/Header";
 import SidebarFilters from "./components/SidebarFilters";
 import Analytics from "./components/Analytics";
@@ -20,7 +20,7 @@ function App() {
      GLOBAL STATES
   ================================ */
 
-  // 🔍 Search input
+  // 🔍 Search input (SINGLE SOURCE OF TRUTH)
   const [searchDistrict, setSearchDistrict] = useState("");
 
   // 🎚 Risk filters
@@ -34,72 +34,55 @@ function App() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // 🗺️ Map-selected district
-  const [selectedDistrict, setSelectedDistrict] = useState(null);
-
   // 🔥 Sidebar real-time info
   const [realtimeInfo, setRealtimeInfo] = useState(null);
   const [loadingRealtime, setLoadingRealtime] = useState(false);
 
-  // 🔮 Sidebar future risk
+  // 🔮 Sidebar AI risk
   const [futureRisk, setFutureRisk] = useState(null);
   const [loadingFuture, setLoadingFuture] = useState(false);
 
   /* ===============================
-     ACTIVE DISTRICT (SINGLE SOURCE)
-  ================================ */
-  const activeDistrict =
-    selectedDistrict?.district || searchDistrict;
-
-  /* ===============================
-     REAL-TIME FIRE STATUS (SIDEBAR)
+     REAL-TIME FIRE STATUS (FIRMS)
   ================================ */
   useEffect(() => {
-    if (!activeDistrict || !API_BASE) {
+    if (!searchDistrict) {
       setRealtimeInfo(null);
       return;
     }
 
-    const controller = new AbortController();
     setLoadingRealtime(true);
 
     fetch(
-      `${API_BASE}/api/realtime/${activeDistrict.toLowerCase()}`,
-      { signal: controller.signal }
+      `${API_BASE}/api/realtime/${searchDistrict.toLowerCase()}`
     )
       .then(res => {
         if (!res.ok) throw new Error("Realtime API failed");
         return res.json();
       })
       .then(data => {
-        setRealtimeInfo(data && data.count > 0 ? data : null);
+        setRealtimeInfo(data || null);
       })
       .catch(err => {
-        if (err.name !== "AbortError") {
-          console.error("❌ Realtime fetch error:", err);
-          setRealtimeInfo(null);
-        }
+        console.error("❌ Realtime fetch error:", err);
+        setRealtimeInfo(null);
       })
       .finally(() => setLoadingRealtime(false));
-
-    return () => controller.abort();
-  }, [activeDistrict]);
+  }, [searchDistrict]);
 
   /* ===============================
-     FUTURE RISK PREDICTION (SIDEBAR)
+     AI RISK OUTLOOK (HISTORICAL)
   ================================ */
   useEffect(() => {
-    if (!activeDistrict || !API_BASE) {
+    if (!searchDistrict) {
       setFutureRisk(null);
       return;
     }
 
-    const controller = new AbortController();
     setLoadingFuture(true);
 
     fetch(
-      `${API_BASE}/api/predict/${activeDistrict.toLowerCase()}`,
-      { signal: controller.signal }
+      `${API_BASE}/api/predict/${searchDistrict.toLowerCase()}`
     )
       .then(res => {
         if (!res.ok) throw new Error("Predict API failed");
@@ -109,15 +92,11 @@ function App() {
         setFutureRisk(data || null);
       })
       .catch(err => {
-        if (err.name !== "AbortError") {
-          console.error("❌ Prediction fetch error:", err);
-          setFutureRisk(null);
-        }
+        console.error("❌ Prediction fetch error:", err);
+        setFutureRisk(null);
       })
       .finally(() => setLoadingFuture(false));
-
-    return () => controller.abort();
-  }, [activeDistrict]);
+  }, [searchDistrict]);
 
   /* ===============================
      RENDER
@@ -149,12 +128,10 @@ function App() {
           riskFilter={riskFilter}
           dateFrom={dateFrom}
           dateTo={dateTo}
-          setSelectedDistrict={setSelectedDistrict}
         />
 
-        {/* RIGHT PANEL ✅ FINAL FIX */}
+        {/* RIGHT PANEL */}
         <Analytics
-          selectedDistrict={selectedDistrict}
           searchDistrict={searchDistrict}
         />
       </div>

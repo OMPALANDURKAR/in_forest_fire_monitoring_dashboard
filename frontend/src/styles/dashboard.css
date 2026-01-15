@@ -1,38 +1,45 @@
+/* =========================================================
+   THEME: BIOLUMINESCENT ZEN (ULTRA-MODERN UPGRADE)
+   Vibe: High-Tech Command Center
+========================================================= */
+
 /* ================================
-   DASHBOARD COLOR PALETTE
-   THEME: BIOLUMINESCENT ZEN (Dark Glass)
+   1. ADVANCED VARIABLES
 ================================ */
 :root {
-  /* BACKGROUNDS */
-  --bg-app: #0f172a;       /* Deep Void Blue (Main Background) */
-  --bg-panel: rgba(15, 23, 42, 0.85); /* Dark Glass (90% Opacity) */
-  --bg-soft: rgba(51, 65, 85, 0.5);   /* Misted Glass (Card Backgrounds) */
-  --bg-input: #1e293b;     /* Dark Slate for input fields */
+  /* DEEP VOID BACKGROUNDS */
+  --bg-app: #020617;        /* Darker, richer black-blue */
+  --bg-panel: rgba(15, 23, 42, 0.65); /* More transparency for glass effect */
+  --bg-card: rgba(30, 41, 59, 0.4);   /* Inner cards */
+  --bg-input: rgba(15, 23, 42, 0.8);
 
-  /* BORDERS */
-  --border-light: #334155; /* Misted Glass Border */
+  /* BORDERS (The "Glass Edge" look) */
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-shine: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
 
   /* TYPOGRAPHY */
-  --text-primary: #f8fafc;   /* Starlight White (Headings) */
-  --text-secondary: #94a3b8; /* Soft Slate (Labels) */
-  --text-muted: #64748b;     /* Darker Grey (Subtext) */
+  --font-main: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace; /* For numbers/data */
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
 
-  /* ACCENTS */
-  --accent-primary: #2dd4bf; /* Electric Mint (Buttons/Active) */
-  --accent-glow: rgba(45, 212, 191, 0.4);
+  /* NEON ACCENTS (Bioluminescence) */
+  --accent-primary: #2dd4bf;  /* Electric Teal */
+  --accent-glow: 0 0 20px rgba(45, 212, 191, 0.5);
+  
+  --risk-high: #f43f5e;       /* Rose Red */
+  --risk-medium: #f59e0b;     /* Amber */
+  --risk-low: #10b981;        /* Emerald */
 
-  /* RISK STATUS COLORS */
-  --risk-high: #ef4444;      /* Bright Red */
-  --risk-medium: #f59e0b;    /* Glowing Amber */
-  --risk-low: #4ade80;       /* Neon Soft Green */
-
-  /* SHADOWS & GLOWS */
-  --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 15px var(--accent-glow);
+  /* LAYOUT */
+  --sidebar-width: 320px;
+  --panel-radius: 16px;
 }
 
 /* ================================
-   GLOBAL RESET
+   2. GLOBAL RESET & BASE
 ================================ */
 * {
   margin: 0;
@@ -43,603 +50,305 @@
 html, body, #root {
   height: 100%;
   width: 100%;
-  font-family: "Inter", system-ui, sans-serif;
-  background: var(--bg-app);
+  background-color: var(--bg-app);
   color: var(--text-primary);
+  font-family: var(--font-main);
+  overflow: hidden; /* Prevent full page scroll */
+}
+
+/* subtle grid background texture */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ================================
-   DASHBOARD LAYOUT
+   3. LAYOUT STRUCTURE
 ================================ */
 .dashboard-container {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
+  position: relative;
+  z-index: 1;
 }
 
-/* ================================
-   HEADER (Hi-Tech Bar)
-================================ */
-.header {
-  background: var(--bg-app);
-  padding: 0.9rem 1.5rem;
-  border-bottom: 1px solid var(--border-light);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow-soft);
-  z-index: 100;
-}
-
-.header h1 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  color: var(--text-primary);
-  text-shadow: 0 0 10px rgba(255,255,255,0.1);
-}
-
-/* ================================
-   MAIN LAYOUT
-================================ */
 .main-layout {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 380px; /* Wider analytics panel */
   position: relative;
 }
 
 /* ================================
-   SIDEBAR (LEFT – FILTERS)
-   Style: Glassmorphism
+   4. HEADER (Floating Bar)
 ================================ */
-.sidebar {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  width: 300px;
-  
-  /* Glass Effect */
-  background: var(--bg-panel);
-  backdrop-filter: blur(12px); 
-  -webkit-backdrop-filter: blur(12px);
-  
-  border: 1px solid var(--border-light);
-  border-radius: 12px;
-  padding: 1.2rem;
-  z-index: 50;
-  box-shadow: var(--shadow-soft);
-
+.header {
+  height: 60px;
+  padding: 0 1.5rem;
   display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
+  align-items: center;
+  justify-content: space-between;
+  
+  background: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: var(--glass-border);
+  z-index: 100;
 }
 
-.sidebar h3 {
-  font-size: 0.75rem;
+.header h1 {
+  font-size: 1rem;
   font-weight: 700;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent-primary); /* Teal Accent */
-  margin-bottom: 0.5rem;
+  background: linear-gradient(to right, #fff, var(--text-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* ================================
-   FILTER STRUCTURE
+   5. GLASS SIDEBAR (The Control Center)
 ================================ */
-.filter-section {
+.sidebar {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  width: var(--sidebar-width);
+  
+  /* The "Holographic Glass" Effect */
+  background: var(--bg-panel);
+  backdrop-filter: blur(20px); /* Deep blur */
+  -webkit-backdrop-filter: blur(20px);
+  
+  border: var(--glass-border);
+  box-shadow: var(--glass-shine), 0 20px 40px rgba(0,0,0,0.4);
+  border-radius: var(--panel-radius);
+  
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  z-index: 50;
+  
+  /* Smooth fade in */
+  animation: slideIn 0.4s ease-out;
+}
+
+.sidebar-block {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.filter-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+.block-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+  text-shadow: 0 0 10px rgba(45, 212, 191, 0.3);
 }
 
-/* INPUTS (Dark Mode Style) */
-.sidebar input[type="text"],
-.sidebar input[type="date"] {
-  padding: 0.6rem 0.8rem;
-  font-size: 0.85rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-light);
+/* High-Tech Inputs */
+.sidebar input {
   background: var(--bg-input);
-  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-family: var(--font-mono); /* Tech font */
+  font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 
 .sidebar input:focus {
   outline: none;
   border-color: var(--accent-primary);
-  box-shadow: 0 0 8px var(--accent-glow);
-}
-
-/* Calendar Icon correction for dark mode */
-::-webkit-calendar-picker-indicator {
-    filter: invert(1);
+  box-shadow: 0 0 15px rgba(45, 212, 191, 0.2);
+  background: rgba(15, 23, 42, 0.95);
 }
 
 /* ================================
-   RISK CHECKBOXES
+   6. RISK FILTERS (Neon Checkboxes)
 ================================ */
-.risk-filters {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.risk-item {
+.risk-filters label {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background 0.2s;
 }
 
-/* The Glowing Dots */
+.risk-filters label:hover {
+  background: rgba(255,255,255,0.05);
+}
+
 .risk-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   position: relative;
 }
 
-.risk-high { 
-  background: var(--risk-high); 
-  box-shadow: 0 0 8px var(--risk-high);
-}
-.risk-medium { 
-  background: var(--risk-medium);
-  box-shadow: 0 0 8px var(--risk-medium);
-}
-.risk-low { 
-  background: var(--risk-low);
-  box-shadow: 0 0 8px var(--risk-low);
+.risk-dot::after {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  border-radius: 50%;
+  opacity: 0.5;
+  filter: blur(2px);
 }
 
-
-/* ================================
-   SIDEBAR BLOCKS / CARDS
-================================ */
-.sidebar-block {
-  border: 1px solid var(--border-light);
-  background: var(--bg-soft);
-  border-radius: 8px;
-  padding: 0.8rem;
-}
-
-.block-title {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-}
+/* Dot Colors with Glow */
+.risk-high .risk-dot { background: var(--risk-high); box-shadow: 0 0 10px var(--risk-high); }
+.risk-medium .risk-dot { background: var(--risk-medium); box-shadow: 0 0 10px var(--risk-medium); }
+.risk-low .risk-dot { background: var(--risk-low); box-shadow: 0 0 10px var(--risk-low); }
 
 /* ================================
-   MAP CONTAINER
+   7. MAP CONTAINER (The Viewport)
 ================================ */
 .map-container {
   grid-column: 1 / 2;
   height: 100%;
   position: relative;
-  /* Darken map slightly to make UI pop */
-  filter: saturate(0.9) contrast(1.1); 
+  /* Darken the map slightly to make UI pop */
+  filter: saturate(1.1) contrast(1.1); 
 }
 
 /* ================================
-   RIGHT PANEL (ANALYTICS)
-   Style: Full Height Glass Panel
+   8. ANALYTICS PANEL (Right Side)
 ================================ */
 .analytics-section {
   grid-column: 2 / 3;
-  background: var(--bg-panel); /* Dark Glass */
-  backdrop-filter: blur(12px);
-  border-left: 1px solid var(--border-light);
+  background: var(--bg-panel);
+  backdrop-filter: blur(20px);
+  border-left: var(--glass-border);
   padding: 1.5rem;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.analytics-section h2 {
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-}
-
-/* ================================
-   ANALYTICS GRID
-================================ */
+/* Stat Cards (Floating Data) */
 .analytics-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.8rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
 }
 
 .stat-card {
-  background: var(--bg-soft);
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  padding: 0.8rem;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1rem;
   transition: transform 0.2s;
 }
 
 .stat-card:hover {
-    border-color: var(--accent-primary);
+  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.15);
 }
 
 .stat-label {
   font-size: 0.65rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
 }
 
 .stat-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-top: 0.2rem;
-}
-
-/* ================================
-   LIVE FIRE LIST
-================================ */
-/* ================================
-   LIVE FIRE LIST (SECTION 6)
-   SCROLLABLE
-================================ */
-.fire-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-
-  max-height: 420px;        /* FIXED HEIGHT FOR SCROLL */
-  overflow-y: auto;         /* ENABLE VERTICAL SCROLL */
-  padding-right: 6px;
-}
-
-/* Custom scrollbar (Bioluminescent Zen) */
-.fire-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.fire-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.fire-list::-webkit-scrollbar-thumb {
-  background: rgba(45, 212, 191, 0.4); /* Electric Mint */
-  border-radius: 6px;
-}
-
-.fire-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(45, 212, 191, 0.65);
-}
-
-
-.fire-item {
-  background: var(--bg-input);
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  padding: 0.8rem;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.fire-item strong {
-    color: var(--text-primary);
-    display: block;
-    margin-bottom: 0.2rem;
-}
-
-/* ================================
-   MAP LEGEND
-================================ */
-.legend {
-  position: absolute;
-  bottom: 1.5rem;
-  right: 1000px;
-  background: var(--bg-panel);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  padding: 0.8rem 1rem;
-  font-size: 0.75rem;
-  color: var(--text-primary);
-  box-shadow: var(--shadow-soft);
-}
-
-/* ================================
-   STATUS PILLS (Safe/Danger)
-================================ */
-.status-pill {
-  font-size: 0.7rem;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
   font-weight: 600;
-  display: inline-block;
-  text-align: center;
-}
-
-.status-pill.safe {
-  background: rgba(74, 222, 128, 0.2); /* Low opacity green */
-  color: var(--risk-low);
-  border: 1px solid var(--risk-low);
-  box-shadow: 0 0 10px rgba(74, 222, 128, 0.2);
-}
-
-.status-pill.danger {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--risk-high);
-  border: 1px solid var(--risk-high);
-}
-
-.status-text {
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
+  color: var(--text-primary);
 }
 
 /* ================================
-   AI RISK METER
+   9. AI RISK METER (Laser Bar)
 ================================ */
 .risk-meter {
-  height: 8px;
-  background: var(--bg-input);
-  border-radius: 4px;
+  height: 6px;
+  background: rgba(0,0,0,0.3);
+  border-radius: 99px;
   overflow: hidden;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  position: relative;
 }
 
 .risk-fill {
   height: 100%;
-  transition: width 0.3s ease;
-  box-shadow: 0 0 10px currentColor; /* Glow based on color */
+  border-radius: 99px;
+  position: relative;
+  /* Animated gradient fill */
+  background: linear-gradient(90deg, var(--risk-low), var(--risk-medium), var(--risk-high));
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite linear;
 }
 
-.risk-fill.low { background: var(--risk-low); color: var(--risk-low); }
-.risk-fill.medium { background: var(--risk-medium); color: var(--risk-medium); }
-.risk-fill.high { background: var(--risk-high); color: var(--risk-high); }
-
-.risk-summary {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.6rem;
-  color: var(--text-primary);
-}
-
-.risk-value {
-  font-weight: 700;
-  font-size: 1.1rem;
-}
-
-.ai-reason {
-  font-size: 0.75rem;
-  margin-top: 0.5rem;
-  color: var(--text-muted);
-  font-style: italic;
+/* The "Glow" under the bar */
+.risk-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 10px;
+  background: #fff;
+  filter: blur(4px);
+  opacity: 0.7;
 }
 
 /* ================================
-   RESPONSIVE
+   10. LEGEND (Floating Pill)
 ================================ */
-@media (max-width: 1024px) {
-  .main-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .analytics-section {
-    display: none;
-  }
-
-  .legend {
-    right: 1.5rem;
-  }
-}
-/* ================================
-   THEME VARIABLES
-================================ */
-:root {
-  --bg-app: #0f172a;
-  --bg-panel: rgba(15, 23, 42, 0.9);
-  --bg-soft: rgba(30, 41, 59, 0.7);
-  --bg-input: #1e293b;
-
-  --border-light: #334155;
-
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  --risk-high: #ef4444;
-  --risk-medium: #f59e0b;
-  --risk-low: #22c55e;
-
-  --shadow-soft: 0 8px 30px rgba(0,0,0,0.35);
-}
-
-/* ================================
-   DASHBOARD LAYOUT
-================================ */
-.dashboard-container {
-  height: 100vh;
-  background: var(--bg-app);
-  color: var(--text-primary);
-  overflow: hidden;
-}
-
-.main-layout {
-  display: grid;
-  grid-template-columns: 1fr 360px;
-  height: calc(100vh - 64px);
-}
-
-/* ================================
-   ANALYTICS PANEL
-================================ */
-.analytics-section {
+.legend {
+  position: absolute;
+  bottom: 2rem;
+  right: calc(380px + 2rem); /* Offset by analytics panel width */
+  
   background: var(--bg-panel);
   backdrop-filter: blur(12px);
-  border-left: 1px solid var(--border-light);
-  padding: 1.4rem;
+  border: var(--glass-border);
+  box-shadow: var(--shadow-soft);
+  
+  border-radius: 50px; /* Pill shape */
+  padding: 0.75rem 1.5rem;
   display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 50;
 }
 
-/* ================================
-   HEADER
-================================ */
-.analytics-header h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.subtext {
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 0.25rem;
-}
-
-/* ================================
-   SUMMARY CARDS (SECTION 5)
-================================ */
-.analytics-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.7rem;
-}
-
-.stat-card {
-  background: var(--bg-soft);
-  border: 1px solid var(--border-light);
-  border-radius: 10px;
-  padding: 0.8rem;
-  transition: transform 0.15s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-}
-
-.stat-label {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  font-weight: 600;
   color: var(--text-secondary);
 }
 
-.stat-value {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin-top: 0.2rem;
-}
-
-.risk-high .stat-value { color: var(--risk-high); }
-.risk-medium .stat-value { color: var(--risk-medium); }
-.risk-low .stat-value { color: var(--risk-low); }
-
 /* ================================
-   SECTION 6 – SCROLL CONTAINER
+   ANIMATIONS
 ================================ */
-.fire-list {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding-right: 4px;
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-.fire-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.fire-list::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 4px;
-}
-
-/* ================================
-   FIRE ITEM / STATUS CARD
-================================ */
-.fire-item {
-  background: var(--bg-input);
-  border: 1px solid var(--border-light);
-  border-radius: 10px;
-  padding: 0.9rem;
-  display: flex;
-  gap: 0.8rem;
-  align-items: flex-start;
-  animation: fadeIn 0.25s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ================================
-   RISK BADGE
-================================ */
-.fire-risk {
-  min-width: 58px;
-  text-align: center;
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.35rem 0.6rem;
-  border-radius: 999px;
-}
-
-.fire-risk.risk-high {
-  background: rgba(239,68,68,0.2);
-  color: var(--risk-high);
-}
-
-.fire-risk.risk-medium {
-  background: rgba(245,158,11,0.2);
-  color: var(--risk-medium);
-}
-
-.fire-risk.risk-low {
-  background: rgba(34,197,94,0.2);
-  color: var(--risk-low);
-}
-
-/* ================================
-   FIRE DETAILS
-================================ */
-.fire-details {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  line-height: 1.45;
-}
-
-.fire-details strong {
-  color: var(--text-primary);
-}
-
-.muted {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 0.3rem;
-}
-
-/* ================================
-   LOADING / EMPTY STATES
-================================ */
-.loading,
-.empty {
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  padding: 1.2rem 0;
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 /* ================================
@@ -649,108 +358,123 @@ html, body, #root {
   .main-layout {
     grid-template-columns: 1fr;
   }
-
   .analytics-section {
-    display: none;
+    display: none; /* Hide analytics on tablet/mobile */
+  }
+  .sidebar {
+    width: calc(100% - 3rem); /* Full width on mobile */
+  }
+  .legend {
+    right: 150rem;
+    bottom: 300rem;
+    flex-direction: column;
+    align-items: flex-start;
+    border-radius: 12px;
+    gap: 0.5rem;
   }
 }
-/* =================================================================
-   HISTORY POPUP (MODAL)
-   THEME: BIOLUMINESCENT ZEN
-================================================================= */
-
+/* ================================
+   11. HISTORY POPUP (Holographic Modal)
+   Style: High-Tech Glass Overlay
+================================ */
 .history-popup {
   position: fixed;
-  top: 50%;               /* Center vertically */
-  left: 50%;              /* Center horizontally */
-  transform: translate(-50%, -50%) scale(0.95); /* Perfect center + start slight scale down for animation */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   
-  /* GLASSMOPHISM BASE */
-  background: rgba(15, 23, 42, 0.95); /* Deep Void Blue with high opacity */
-  backdrop-filter: blur(20px);        /* Strong frosted glass effect */
-  -webkit-backdrop-filter: blur(20px);
-  
-  /* BORDERS & GLOW */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 20px 50px rgba(0, 0, 0, 0.7),        /* Deep drop shadow */
-    0 0 0 1px rgba(255, 255, 255, 0.05),   /* Inner stroke */
-    0 0 30px rgba(45, 212, 191, 0.1);      /* Faint Mint Glow */
-
-  border-radius: 16px;
-  padding: 0;             /* Remove default padding to style header/body separately */
-  z-index: 10000;         /* Highest layer (Above Map) */
-  min-width: 320px;
+  width: 400px;
   max-width: 90vw;
+  z-index: 10000;
   
-  color: #f1f5f9;         /* Starlight White */
-  font-family: "Inter", sans-serif;
-  overflow: hidden;       /* Keeps child elements inside rounded corners */
+  /* Deep Glass Effect */
+  background: rgba(2, 6, 23, 0.95); /* Almost solid dark to block map */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   
-  /* ENTRY ANIMATION */
-  animation: popupSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  /* Glowing Border */
+  border: var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1), /* Inner shine */
+    0 25px 50px -12px rgba(0, 0, 0, 0.9);     /* Deep drop shadow */
+    
+  overflow: hidden;
+  
+  /* Bouncy Entrance Animation */
+  animation: popupIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* HEADER SECTION */
+/* Header with Gradient Line */
 .history-popup-header {
-  padding: 16px 20px;
-  background: rgba(30, 41, 59, 0.5); /* Slightly lighter header */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem 1.25rem;
+  background: linear-gradient(to right, rgba(255,255,255,0.03), transparent);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .history-popup-header h3 {
-  margin: 0;
-  font-size: 1rem;
+  font-family: var(--font-mono); /* Tech font */
+  font-size: 0.9rem;
   font-weight: 600;
-  color: #2dd4bf; /* Electric Mint Text */
-  letter-spacing: 0.5px;
+  color: var(--accent-primary);
   text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
+  /* Neon Text Glow */
+  text-shadow: 0 0 15px rgba(45, 212, 191, 0.4);
 }
 
-/* CLOSE BUTTON */
+/* Close Button (Interactive) */
 .history-popup-close {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-muted);
+  font-size: 1.25rem;
   cursor: pointer;
-  font-size: 1.2rem;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
 }
 
 .history-popup-close:hover {
-  color: #ef4444; /* Red on hover */
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: rotate(90deg); /* Tech spin effect */
 }
 
-/* CONTENT BODY */
+/* Body Content */
 .history-popup-body {
-  padding: 20px;
-  max-height: 60vh; /* Prevent it from being too tall on small screens */
-  overflow-y: auto;
+  padding: 1.5rem;
   font-size: 0.9rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
-/* SCROLLBAR FOR POPUP */
-.history-popup-body::-webkit-scrollbar {
-  width: 6px;
-}
-.history-popup-body::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
+/* Highlight numbers inside the popup */
+.history-popup-body strong, 
+.history-popup-body b {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-family: var(--font-mono);
 }
 
-/* ANIMATION KEYFRAMES */
-@keyframes popupSlideIn {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -45%) scale(0.95);
+/* Entrance Animation */
+@keyframes popupIn {
+  0% { 
+    opacity: 0; 
+    transform: translate(-50%, -40%) scale(0.9); 
   }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+  100% { 
+    opacity: 1; 
+    transform: translate(-50%, -50%) scale(1); 
   }
 }
