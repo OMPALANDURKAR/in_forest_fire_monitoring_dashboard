@@ -153,6 +153,38 @@ app.get("/api/predict/:district", (req, res) => {
       "Prediction based on historical fire frequency compared to long-term average",
   });
 });
+// 📊 HISTORICAL SUMMARY FOR A DISTRICT (POPUP DATA)
+app.get("/api/history/:district", (req, res) => {
+  loadHistoricalFires();
+
+  const district = req.params.district.toLowerCase();
+
+  const fires = historicalFires.filter(
+    f => f.district?.toLowerCase() === district
+  );
+
+  if (fires.length === 0) {
+    return res.json({
+      district,
+      totalFires: 0,
+      firstFireDate: null,
+      lastFireDate: null,
+      message: "No historical fire records found",
+    });
+  }
+
+  const dates = fires
+    .map(f => f.acq_date)
+    .filter(Boolean)
+    .sort();
+
+  res.json({
+    district,
+    totalFires: fires.length,
+    firstFireDate: dates[0] || null,
+    lastFireDate: dates[dates.length - 1] || null,
+  });
+});
 
 // 🔻 404 HANDLER
 app.use((req, res) => {
