@@ -35,11 +35,10 @@ const getDistrictName = (p) =>
   p?.DISTRICT || p?.district || p?.NAME_3 || p?.NAME_2 || p?.dtname || null;
 
 /* ===============================
-   VALID DISTRICT CHECK (🔥 KEY FIX)
+   VALID DISTRICT CHECK
 ================================ */
 const isValidDistrict = (name, geo) => {
   if (!name || !geo?.features) return false;
-
   const target = normalize(name);
 
   return geo.features.some(f => {
@@ -58,7 +57,6 @@ const FocusDistrict = ({ districtGeo, searchDistrict }) => {
     if (!isValidDistrict(searchDistrict, districtGeo)) return;
 
     const target = normalize(searchDistrict);
-
     const feature = districtGeo.features.find(f => {
       const name = getDistrictName(f.properties);
       return normalize(name) === target;
@@ -87,6 +85,9 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
   const [mapFires, setMapFires] = useState([]);
   const [districtGeo, setDistrictGeo] = useState(null);
   const [dataMode, setDataMode] = useState("historical");
+
+  /* 🔥 BASEMAP STATE (FIX) */
+  const [basemap, setBasemap] = useState("satellite");
 
   /* ===============================
      POPUP STATE
@@ -138,7 +139,7 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
   };
 
   /* ===============================
-     SEARCH → POPUP (🔥 SINGLE AUTHORITY)
+     SEARCH → POPUP (SINGLE SOURCE)
   ================================ */
   useEffect(() => {
     if (
@@ -149,7 +150,6 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
       setPopupData(null);
       return;
     }
-
     openPopup(searchDistrict);
   }, [searchDistrict, dataMode, districtGeo]);
 
@@ -182,7 +182,7 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
   return (
     <div className="map-container">
 
-      {/* MODE TOGGLE */}
+      {/* DATA MODE TOGGLE */}
       <div className="data-toggle">
         <button
           className={dataMode === "historical" ? "active" : ""}
@@ -190,7 +190,6 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
         >
           Historical
         </button>
-
         <button
           className={dataMode === "realtime" ? "active" : ""}
           onClick={() => {
@@ -203,9 +202,29 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
         </button>
       </div>
 
+      {/* 🔥 BASEMAP TOGGLE (RESTORED) */}
+      <div className="basemap-toggle">
+        <button
+          className={basemap === "street" ? "active" : ""}
+          onClick={() => setBasemap("street")}
+        >
+          Street
+        </button>
+        <button
+          className={basemap === "satellite" ? "active" : ""}
+          onClick={() => setBasemap("satellite")}
+        >
+          Satellite
+        </button>
+      </div>
+
       <MapContainer center={[22.6, 79]} zoom={5} preferCanvas>
         <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+          url={
+            basemap === "satellite"
+              ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          }
         />
 
         {districtGeo && (

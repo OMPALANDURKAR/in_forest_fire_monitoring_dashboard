@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 /* ===============================
    BACKEND BASE URL
@@ -8,9 +8,9 @@ const API_BASE =
   "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 /* ===============================
-   ANALYTICS PANEL (FIXED)
+   ANALYTICS PANEL (FIRMS NRT – FINAL)
 ================================ */
-const Analytics = ({ selectedDistrict, searchDistrict }) => {
+const Analytics = () => {
   const [summary, setSummary] = useState({
     total: 0,
     High: 0,
@@ -19,69 +19,70 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
   });
 
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [lastUpdatedTime, setLastUpdatedTime] = useState(null);
 
   /* ===============================
-     ACTIVE DISTRICT (SINGLE SOURCE)
-  ================================ */
-  const activeDistrict = useMemo(() => {
-    return selectedDistrict?.district || searchDistrict || null;
-  }, [selectedDistrict, searchDistrict]);
-
-  /* ===============================
-     FETCH REAL-TIME DATA (FIXED)
+     FETCH FIRMS NRT DATA (ONLY SOURCE)
   ================================ */
   useEffect(() => {
-    if (!activeDistrict) {
-      // Reset when no district is selected
-      setSummary({ total: 0, High: 0, Medium: 0, Low: 0 });
-      setLastUpdated(null);
-      return;
-    }
+    let cancelled = false;
 
-    fetch(
-      `${API_BASE}/api/realtime/${activeDistrict.toLowerCase()}`
-    )
+    fetch(`${API_BASE}/api/fires-realtime`)
       .then(res => res.json())
       .then(data => {
-        const total = data.activeFires || 0;
+        if (!Array.isArray(data) || cancelled) return;
 
-        // Simple severity split (UI-level logic)
-        const High = total > 50 ? total : 0;
-        const Medium = total > 10 && total <= 50 ? total : 0;
-        const Low = total <= 10 ? total : 0;
+        const s = { total: 0, High: 0, Medium: 0, Low: 0 };
 
-        setSummary({
-          total,
-          High,
-          Medium,
-          Low,
+        data.forEach(f => {
+          s.total++;
+
+          if (f.confidence === "h") s.High++;
+          else if (f.confidence === "n") s.Medium++;
+          else s.Low++;
         });
 
-        setLastUpdated(data.lastUpdated || null);
+        setSummary(s);
+
+        if (data.length) {
+          const latest = data.reduce((a, b) =>
+            `${a.acq_date}${a.acq_time}` >
+            `${b.acq_date}${b.acq_time}`
+              ? a
+              : b
+          );
+
+          setLastUpdated(latest.acq_date);
+          setLastUpdatedTime(latest.acq_time);
+        }
       })
       .catch(() => {
         setSummary({ total: 0, High: 0, Medium: 0, Low: 0 });
         setLastUpdated(null);
+        setLastUpdatedTime(null);
       });
-  }, [activeDistrict]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /* ===============================
      RENDER
   ================================ */
   return (
     <section className="analytics-section">
-      {/* ===============================
-         SECTION 5 — OVERVIEW
-      ================================ */}
+      {/* HEADER */}
       <div className="analytics-header">
         <h2>Near Real-Time Fire Overview</h2>
         {lastUpdated && (
           <div className="subtext">
-            Last satellite update: {lastUpdated}
+            Last satellite update: {lastUpdated} {lastUpdatedTime}
           </div>
         )}
       </div>
 
+      {/* SUMMARY CARDS */}
       <div className="analytics-grid">
         <div className="stat-card">
           <div className="stat-label">Active Fires</div>
@@ -105,32 +106,27 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
       </div>
 
       {/* ===============================
-         SECTION 6 — DISTRICT STATUS
+         FIRE SEVERITY DISTRIBUTION (EYE CATCHY)
       ================================ */}
-      <div className="district-status-box">
-        {!activeDistrict ? (
-          <div className="empty muted">
-            Select a district to view real-time fire status
-          </div>
-        ) : (
-          <div
-            className={`status-card ${
-              summary.total > 0 ? "danger" : "safe"
-            }`}
-          >
-            <div className="status-title">{activeDistrict}</div>
-            <div className="status-value">
-              {summary.total > 0
-                ? `${summary.total} active fire(s) detected`
-                : "No active forest fire cases"}
-            </div>
-            {lastUpdated && (
-              <div className="status-sub">
-                Last updated: {lastUpdated}
-              </div>
-            )}
-          </div>
-        )}
+      <div className="fire-chart-card">
+        <h3 className="chart-title">Fire Severity Distribution</h3>
+
+        <div
+  className="donut-chart animate"
+  style={{
+    "--high": summary.High,
+    "--medium": summary.Medium,
+    "--low": summary.Low,
+    "--total": summary.total || 1
+  }}
+/>
+
+
+        <div className="chart-legend">
+          <div><span className="dot high" /> High</div>
+          <div><span className="dot medium" /> Medium</div>
+          <div><span className="dot low" /> Low</div>
+        </div>
       </div>
     </section>
   );
