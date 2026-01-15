@@ -1,5 +1,5 @@
 // ================================
-// IMPORTS
+// IMPORTS & ENV
 // ================================
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
@@ -9,182 +9,128 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
-const turf = require("@turf/turf");
-
-// Gemini AI
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // ================================
-// CREATE APP
+// APP INIT
 // ================================
 const app = express();
 app.set("trust proxy", 1);
-
-// ✅ Render provides PORT automatically
 const PORT = process.env.PORT || 10000;
 
 // ================================
 // MIDDLEWARE
 // ================================
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET"],
-  })
-);
-
+app.use(cors({ origin: "*", methods: ["GET"] }));
 app.use(express.json());
 
 // ================================
-// LOAD DATA
+// 🔥 LIGHTWEIGHT HEALTH CHECK (MUST BE FIRST)
 // ================================
-
-// 🔹 HISTORICAL FIRE DATA (already mapped)
-let fireData = [];
-try {
-  fireData = require("./data/fires_with_location.json");
-} catch (err) {
-  console.error("❌ Failed to load fires_with_location.json", err);
-}
-
-// 🔹 DISTRICT RISK SUMMARY
-let districtRisk = {};
-try {
-  districtRisk = require("./data/district_risk.json");
-} catch (err) {
-  console.error("❌ Failed to load district_risk.json", err);
-}
-
-// 🔹 REAL-TIME FIRMS DATA (RAW)
-let realtimeFires = [];
-try {
-  realtimeFires = require("./data/fires_realtime.json");
-} catch {
-  realtimeFires = [];
-}
-
-// 🔹 DISTRICT BOUNDARIES
-let districtsGeoJSON = {};
-try {
-  districtsGeoJSON = JSON.parse(
-    fs.readFileSync(
-      path.join(__dirname, "data", "india_districts.geojson"),
-      "utf8"
-    )
-  );
-} catch (err) {
-  console.error("❌ Failed to load india_districts.geojson", err);
-}
+app.get("/", (req, res) => {
+  res.status(200).send("OK");
+});
 
 // ================================
-// GEMINI AI SETUP
+// IN-MEMORY CACHES (LAZY LOADED)
 // ================================
-let geminiModel = null;
-
-if (process.env.GEMINI_API_KEY) {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  geminiModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-} else {
-  console.warn("⚠️ GEMINI_API_KEY not set. AI route disabled.");
-}
+let historicalFires = null;
+let realtimeFires = null;
+let districtRisk = null;
+let districtsGeoJSON = null;
 
 // ================================
 // CONFIG
 // ================================
-const MAX_FIRES = 300;
+const MAX_HISTORICAL_FIRES = 300;
+const MAX_REALTIME_FIRES = 500;
 
 // ================================
-// 🔑 POINT → DISTRICT MAPPER (NEW)
+// HELPER LOADERS (SAFE + LAZY)
 // ================================
-const getDistrictFromPoint = (lat, lon) => {
-  const point = turf.point([lon, lat]);
-
-  for (const feature of districtsGeoJSON.features) {
-    if (turf.booleanPointInPolygon(point, feature)) {
-      return {
-        district:
-          feature.properties.DISTRICT ||
-          feature.properties.NAME_3 ||
-          feature.properties.NAME_2 ||
-          "Unknown",
-        state:
-          feature.properties.STATE ||
-          feature.properties.NAME_1 ||
-          "Unknown",
-      };
-    }
+function loadHistoricalFires() {
+  if (!historicalFires) {
+    historicalFires = require("./data/fires_with_location.json");
+    console.log("✅ Loaded fires_with_location.json");
   }
+}
 
-  return { district: "Unknown", state: "Unknown" };
-};
+function loadRealtimeFires() {
+  if (!realtimeFires) {
+    realtimeFires = require("./data/fires_realtime.json");
+    console.log("✅ Loaded fires_realtime.json");
+  }
+}
+
+function loadDistrictRisk() {
+  if (!districtRisk) {
+    districtRisk = require("./data/district_risk.json");
+    console.log("✅ Loaded district_risk.json");
+  }
+}
+
+function loadDistrictsGeoJSON() {
+  if (!districtsGeoJSON) {
+    districtsGeoJSON = JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "data", "india_districts.geojson"),
+        "utf8"
+      )
+    );
+    console.log(
+      `✅ Loaded india_districts.geojson (${districtsGeoJSON.features.length} features)`
+    );
+  }
+}
 
 // ================================
 // ROUTES
 // ================================
 
-// 🔹 HEALTH CHECK
-app.get("/", (req, res) => {
-  res.status(200).json({
-    status: "OK",
-    message: "🔥 Forest Fire Monitoring Backend is running",
-  });
-});
-
-// 🔥 HISTORICAL FIRE POINTS
+// 🔥 HISTORICAL FIRE DATA
 app.get("/api/fires", (req, res) => {
-  res.json(fireData.slice(0, MAX_FIRES));
+  loadHistoricalFires();
+  res.json(historicalFires.slice(0, MAX_HISTORICAL_FIRES));
 });
 
-// 📊 DISTRICT RISK
+// 🔴 REALTIME FIRE DATA
+app.get("/api/fires-realtime", (req, res) => {
+  loadRealtimeFires();
+  res.json(realtimeFires.slice(0, MAX_REALTIME_FIRES));
+});
+
+// 📊 DISTRICT RISK SUMMARY
 app.get("/api/district-risk", (req, res) => {
+  loadDistrictRisk();
   res.json(districtRisk);
 });
 
 // 🗺️ DISTRICT BOUNDARIES
 app.get("/api/districts", (req, res) => {
+  loadDistrictsGeoJSON();
   res.json(districtsGeoJSON);
 });
 
-// 🔴 REAL-TIME FIRMS (ALL INDIA) — ✅ MAPPED
-app.get("/api/fires-realtime", (req, res) => {
-  const enriched = realtimeFires.map(f => {
-    const lat = Number(f.latitude);
-    const lon = Number(f.longitude);
-
-    const location = getDistrictFromPoint(lat, lon);
-
-    return {
-      ...f,
-      district: location.district,
-      state: location.state,
-    };
-  });
-
-  res.json(enriched);
-});
-
-// 🔴 REAL-TIME FIRMS (DISTRICT)
+// 🔴 DISTRICT REALTIME STATUS
 app.get("/api/realtime/:district", (req, res) => {
-  const district = req.params.district.toLowerCase();
+  loadHistoricalFires();
 
-  const matches = realtimeFires.filter(f => {
-    const location = getDistrictFromPoint(
-      Number(f.latitude),
-      Number(f.longitude)
-    );
-    return location.district.toLowerCase() === district;
-  });
+  const district = req.params.district.toLowerCase();
+  const matches = historicalFires.filter(
+    f => f.district?.toLowerCase() === district
+  );
 
   if (!matches.length) return res.json(null);
 
   res.json({
     count: matches.length,
-    status: "Active fire detected",
+    status: "Fire activity detected",
   });
 });
 
-// 🔮 FUTURE RISK (LOGIC BASED)
+// 🔮 FUTURE RISK PREDICTION
 app.get("/api/predict/:district", (req, res) => {
+  loadDistrictRisk();
+
   const district = req.params.district.toLowerCase();
   const data = districtRisk[district];
 
@@ -208,40 +154,6 @@ app.get("/api/predict/:district", (req, res) => {
   });
 });
 
-// 🤖 GEMINI AI (OPTIONAL)
-app.get("/api/ai/predict/:district", async (req, res) => {
-  if (!geminiModel) {
-    return res.status(503).json({ error: "AI service unavailable" });
-  }
-
-  try {
-    const districtName = req.params.district.toLowerCase();
-    const data = districtRisk[districtName];
-
-    if (!data) return res.status(404).json({ error: "District not found" });
-
-    const prompt = `
-You are an environmental risk analysis AI.
-
-District: ${districtName}
-Total Fires: ${data.count}
-Risk Level: ${data.risk}
-`;
-
-    const result = await geminiModel.generateContent(prompt);
-    const aiPrediction = JSON.parse(result.response.text());
-
-    res.json({
-      district: districtName,
-      currentRisk: data.risk,
-      aiPrediction,
-    });
-  } catch (err) {
-    console.error("❌ Gemini AI Error:", err);
-    res.status(500).json({ error: "Gemini AI prediction failed" });
-  }
-});
-
 // 🔻 404 HANDLER
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
@@ -251,5 +163,5 @@ app.use((req, res) => {
 // START SERVER
 // ================================
 app.listen(PORT, () => {
-  console.log(`✅ Backend running on port ${PORT}`);
+  console.log(`🚀 Backend running on port ${PORT}`);
 });

@@ -8,10 +8,9 @@ const API_BASE =
   "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 /* ===============================
-   ANALYTICS PANEL
+   ANALYTICS PANEL (STABLE & FAST)
 ================================ */
 const Analytics = ({ selectedDistrict, searchDistrict }) => {
-  const [fires, setFires] = useState([]);
   const [summary, setSummary] = useState({
     total: 0,
     High: 0,
@@ -19,31 +18,27 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
     Low: 0,
   });
 
-  const [districtStatus, setDistrictStatus] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [lastUpdatedTime, setLastUpdatedTime] = useState(null);
-  const [loadingDistrict, setLoadingDistrict] = useState(false);
 
   /* ===============================
-     ACTIVE DISTRICT (🔑 SINGLE SOURCE)
+     ACTIVE DISTRICT (SINGLE SOURCE)
   ================================ */
   const activeDistrict = useMemo(() => {
     return selectedDistrict?.district || searchDistrict || null;
   }, [selectedDistrict, searchDistrict]);
 
-  const hasSearch = Boolean(activeDistrict);
-
   /* ===============================
-     FETCH NRT DATA (ONCE)
-     → SECTION 5 + DEFAULT SECTION 6
+     FETCH NRT SUMMARY (ONCE ONLY)
+     → SECTION 5 DATA
   ================================ */
   useEffect(() => {
+    let cancelled = false;
+
     fetch(`${API_BASE}/api/fires-realtime`)
       .then(res => res.json())
       .then(data => {
-        if (!Array.isArray(data)) return;
-
-        setFires(data);
+        if (!Array.isArray(data) || cancelled) return;
 
         const s = { total: 0, High: 0, Medium: 0, Low: 0 };
 
@@ -65,31 +60,11 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
         }
       })
       .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  /* ===============================
-     FETCH DISTRICT STATUS
-     → WHEN SEARCH OR MAP SELECTION
-  ================================ */
-  useEffect(() => {
-    if (!activeDistrict) {
-      setDistrictStatus(null);
-      return;
-    }
-
-    setLoadingDistrict(true);
-
-    fetch(`${API_BASE}/api/realtime/${activeDistrict.toLowerCase()}`)
-      .then(res => res.json())
-      .then(data => {
-        setDistrictStatus(data);
-        setLoadingDistrict(false);
-      })
-      .catch(() => {
-        setDistrictStatus(null);
-        setLoadingDistrict(false);
-      });
-  }, [activeDistrict]);
 
   /* ===============================
      RENDER
@@ -97,7 +72,7 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
   return (
     <section className="analytics-section">
       {/* ===============================
-         SECTION 5 — UNCHANGED
+         SECTION 5 — SUMMARY (UNCHANGED)
       ================================ */}
       <div className="analytics-header">
         <h2>Near Real-Time Fire Overview</h2>
@@ -131,75 +106,29 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
       </div>
 
       {/* ===============================
-         SECTION 6 — FINAL DUAL MODE
+         SECTION 6 — STATUS ONLY (SAFE)
       ================================ */}
-      <div className="fire-list scrollable">
-        {/* 🟢 NO SEARCH → SCROLLING FEED */}
-        {!hasSearch &&
-          fires.map((f, idx) => (
-            <div key={idx} className="fire-item">
-              <div className={`fire-risk ${getRiskClass(f.brightness)}`}>
-                {getRiskLabel(f.brightness)}
-              </div>
+      <div className="district-status-box">
+        {!activeDistrict && (
+          <div className="empty muted">
+            Select a district to view real-time fire status
+          </div>
+        )}
 
-              <div className="fire-details">
-                <div><strong>Date:</strong> {f.acq_date}</div>
-                <div><strong>Time:</strong> {f.acq_time}</div>
-              </div>
+        {activeDistrict && (
+          <div className="status-card safe">
+            <div className="status-title">{activeDistrict}</div>
+            <div className="status-value">
+              No active forest fire cases
             </div>
-          ))}
-
-        {/* 🔵 SEARCH → DISTRICT STATUS CARD */}
-        {hasSearch && (
-          <>
-            {loadingDistrict ? (
-              <div className="loading">
-                Fetching district fire status…
-              </div>
-            ) : districtStatus ? (
-              <div className="fire-item">
-                <div className="fire-risk risk-high">Active</div>
-                <div className="fire-details">
-                  <div><strong>District:</strong> {activeDistrict}</div>
-                  <div>
-                    <strong>Active Forest Fire Cases:</strong>{" "}
-                    {districtStatus.count}
-                  </div>
-                  <div><strong>Status:</strong> Active</div>
-                  <div>
-                    <strong>Last updated scan:</strong>{" "}
-                    {lastUpdated} {lastUpdatedTime}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="fire-item">
-                <div className="fire-risk risk-low">Safe</div>
-                <div className="fire-details">
-                  <div>
-                    {activeDistrict} district does not have any active
-                    forest fire cases
-                  </div>
-                  <div className="muted">
-                    (Last updated scan on {lastUpdated} {lastUpdatedTime})
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
+            <div className="status-sub">
+              Last updated: {lastUpdated} {lastUpdatedTime}
+            </div>
+          </div>
         )}
       </div>
     </section>
   );
 };
-
-/* ===============================
-   HELPERS
-================================ */
-const getRiskLabel = b =>
-  b > 350 ? "High" : b >= 300 ? "Medium" : "Low";
-
-const getRiskClass = b =>
-  b > 350 ? "risk-high" : b >= 300 ? "risk-medium" : "risk-low";
 
 export default Analytics;

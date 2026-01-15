@@ -1,12 +1,6 @@
 const SidebarFilters = ({
   searchDistrict = "",
   setSearchDistrict,
-  riskFilter = {},
-  setRiskFilter,
-  dateFrom = "",
-  setDateFrom,
-  dateTo = "",
-  setDateTo,
   realtimeInfo,
   futureRisk,
   loadingRealtime = false,
@@ -89,46 +83,6 @@ const SidebarFilters = ({
         ) : (
           <p className="muted">Prediction unavailable</p>
         )}
-      </div>
-
-      {/* =========================
-         FILTERS
-      ========================= */}
-      <div className="sidebar-block">
-        <h4 className="block-title">Filters</h4>
-
-        <div className="risk-filters">
-          {["high", "medium", "low"].map(level => (
-            <label key={level} className="risk-item">
-              <input
-                type="checkbox"
-                checked={!!riskFilter[level]}
-                onChange={() =>
-                  setRiskFilter(prev => ({
-                    ...prev,
-                    [level]: !prev[level]
-                  }))
-                }
-              />
-              <span className={`risk-dot ${level}`} />
-              {level.toUpperCase()}
-            </label>
-          ))}
-        </div>
-
-        <div className="date-group">
-          <input
-            type="date"
-            value={dateFrom}
-            onChange={e => setDateFrom(e.target.value)}
-          />
-          <span>to</span>
-          <input
-            type="date"
-            value={dateTo}
-            onChange={e => setDateTo(e.target.value)}
-          />
-        </div>
       </div>
 
     </aside>
