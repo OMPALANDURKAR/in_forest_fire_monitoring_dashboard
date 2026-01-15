@@ -8,7 +8,7 @@ const API_BASE =
   "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 /* ===============================
-   ANALYTICS PANEL (STABLE & FAST)
+   ANALYTICS PANEL (FIXED)
 ================================ */
 const Analytics = ({ selectedDistrict, searchDistrict }) => {
   const [summary, setSummary] = useState({
@@ -19,7 +19,6 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
   });
 
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [lastUpdatedTime, setLastUpdatedTime] = useState(null);
 
   /* ===============================
      ACTIVE DISTRICT (SINGLE SOURCE)
@@ -29,42 +28,42 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
   }, [selectedDistrict, searchDistrict]);
 
   /* ===============================
-     FETCH NRT SUMMARY (ONCE ONLY)
-     → SECTION 5 DATA
+     FETCH REAL-TIME DATA (FIXED)
   ================================ */
   useEffect(() => {
-    let cancelled = false;
+    if (!activeDistrict) {
+      // Reset when no district is selected
+      setSummary({ total: 0, High: 0, Medium: 0, Low: 0 });
+      setLastUpdated(null);
+      return;
+    }
 
-    fetch(`${API_BASE}/api/fires-realtime`)
+    fetch(
+      `${API_BASE}/api/realtime/${activeDistrict.toLowerCase()}`
+    )
       .then(res => res.json())
       .then(data => {
-        if (!Array.isArray(data) || cancelled) return;
+        const total = data.activeFires || 0;
 
-        const s = { total: 0, High: 0, Medium: 0, Low: 0 };
+        // Simple severity split (UI-level logic)
+        const High = total > 50 ? total : 0;
+        const Medium = total > 10 && total <= 50 ? total : 0;
+        const Low = total <= 10 ? total : 0;
 
-        data.forEach(f => {
-          s.total++;
-          if (f.brightness > 350) s.High++;
-          else if (f.brightness >= 300) s.Medium++;
-          else s.Low++;
+        setSummary({
+          total,
+          High,
+          Medium,
+          Low,
         });
 
-        setSummary(s);
-
-        if (data.length) {
-          const latest = data.reduce(
-            (a, b) => (a.acq_date > b.acq_date ? a : b)
-          );
-          setLastUpdated(latest.acq_date);
-          setLastUpdatedTime(latest.acq_time);
-        }
+        setLastUpdated(data.lastUpdated || null);
       })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+      .catch(() => {
+        setSummary({ total: 0, High: 0, Medium: 0, Low: 0 });
+        setLastUpdated(null);
+      });
+  }, [activeDistrict]);
 
   /* ===============================
      RENDER
@@ -72,7 +71,7 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
   return (
     <section className="analytics-section">
       {/* ===============================
-         SECTION 5 — SUMMARY (UNCHANGED)
+         SECTION 5 — OVERVIEW
       ================================ */}
       <div className="analytics-header">
         <h2>Near Real-Time Fire Overview</h2>
@@ -106,24 +105,30 @@ const Analytics = ({ selectedDistrict, searchDistrict }) => {
       </div>
 
       {/* ===============================
-         SECTION 6 — STATUS ONLY (SAFE)
+         SECTION 6 — DISTRICT STATUS
       ================================ */}
       <div className="district-status-box">
-        {!activeDistrict && (
+        {!activeDistrict ? (
           <div className="empty muted">
             Select a district to view real-time fire status
           </div>
-        )}
-
-        {activeDistrict && (
-          <div className="status-card safe">
+        ) : (
+          <div
+            className={`status-card ${
+              summary.total > 0 ? "danger" : "safe"
+            }`}
+          >
             <div className="status-title">{activeDistrict}</div>
             <div className="status-value">
-              No active forest fire cases
+              {summary.total > 0
+                ? `${summary.total} active fire(s) detected`
+                : "No active forest fire cases"}
             </div>
-            <div className="status-sub">
-              Last updated: {lastUpdated} {lastUpdatedTime}
-            </div>
+            {lastUpdated && (
+              <div className="status-sub">
+                Last updated: {lastUpdated}
+              </div>
+            )}
           </div>
         )}
       </div>

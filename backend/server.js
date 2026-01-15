@@ -122,6 +122,11 @@ app.get("/api/realtime/:district", (req, res) => {
     lastUpdated: new Date().toISOString(),
   });
 });
+// 🔴 REAL-TIME FIRES (FIRMS NRT - ALL INDIA)
+app.get("/api/fires-realtime", (req, res) => {
+  loadRealtimeFires();
+  res.json(realtimeFires);
+});
 
 // 📊 DISTRICT RISK SUMMARY
 app.get("/api/district-risk", (req, res) => {
@@ -196,6 +201,11 @@ app.get("/api/history/:district", (req, res) => {
     firstFireDate: dates[0].toISOString().split("T")[0],
     lastFireDate: dates[dates.length - 1].toISOString().split("T")[0],
   });
+});
+// 🔴 FIRMS NEAR REAL-TIME (ALL INDIA)
+app.get("/api/fires-realtime", (req, res) => {
+  loadRealtimeFires();
+  res.json(realtimeFires);
 });
 
 // 🔻 404

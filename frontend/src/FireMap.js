@@ -17,7 +17,7 @@ const API_BASE =
   "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 /* ===============================
-   UTILS (🔥 FIXED)
+   UTILS (STRICT NORMALIZATION)
 ================================ */
 const normalize = (name) =>
   name
@@ -35,13 +35,27 @@ const getDistrictName = (p) =>
   p?.DISTRICT || p?.district || p?.NAME_3 || p?.NAME_2 || p?.dtname || null;
 
 /* ===============================
+   VALID DISTRICT CHECK (🔥 KEY FIX)
+================================ */
+const isValidDistrict = (name, geo) => {
+  if (!name || !geo?.features) return false;
+
+  const target = normalize(name);
+
+  return geo.features.some(f => {
+    const d = getDistrictName(f.properties);
+    return normalize(d) === target;
+  });
+};
+
+/* ===============================
    MAP FOCUS HANDLER
 ================================ */
 const FocusDistrict = ({ districtGeo, searchDistrict }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!searchDistrict || !districtGeo?.features) return;
+    if (!isValidDistrict(searchDistrict, districtGeo)) return;
 
     const target = normalize(searchDistrict);
 
@@ -67,18 +81,21 @@ const FocusDistrict = ({ districtGeo, searchDistrict }) => {
    MAIN COMPONENT
 ================================================== */
 const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
+  /* ===============================
+     MAP DATA
+  ================================ */
   const [mapFires, setMapFires] = useState([]);
-  const [historicalFires, setHistoricalFires] = useState([]);
   const [districtGeo, setDistrictGeo] = useState(null);
-
-  const [basemap, setBasemap] = useState("satellite");
   const [dataMode, setDataMode] = useState("historical");
 
+  /* ===============================
+     POPUP STATE
+  ================================ */
   const [popupDistrict, setPopupDistrict] = useState(null);
-  const [popupStats, setPopupStats] = useState(null);
+  const [popupData, setPopupData] = useState(null);
 
   /* ===============================
-     FETCH MAP DATA
+     FETCH MAP FIRES
   ================================ */
   useEffect(() => {
     const url =
@@ -93,16 +110,6 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
   }, [dataMode]);
 
   /* ===============================
-     FETCH HISTORICAL DATA (POPUP)
-  ================================ */
-  useEffect(() => {
-    fetch(`${API_BASE}/api/fires`)
-      .then(res => res.json())
-      .then(data => setHistoricalFires(Array.isArray(data) ? data : []))
-      .catch(() => setHistoricalFires([]));
-  }, []);
-
-  /* ===============================
      FETCH DISTRICTS
   ================================ */
   useEffect(() => {
@@ -113,38 +120,38 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
   }, []);
 
   /* ===============================
-     OPEN POPUP (🔥 FIXED)
+     OPEN POPUP (BACKEND)
   ================================ */
-  const openPopup = (district) => {
-    const history = historicalFires.filter(
-      f => normalize(f.district) === normalize(district)
-    );
+  const openPopup = async (district) => {
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/history/${normalize(district)}`
+      );
+      const data = await res.json();
 
-    setPopupDistrict(district);
+      setPopupDistrict(district);
+      setPopupData(data);
+    } catch {
+      setPopupDistrict(district);
+      setPopupData({ totalFires: 0 });
+    }
+  };
 
-    if (!history.length) {
-      setPopupStats({ empty: true });
+  /* ===============================
+     SEARCH → POPUP (🔥 SINGLE AUTHORITY)
+  ================================ */
+  useEffect(() => {
+    if (
+      dataMode !== "historical" ||
+      !isValidDistrict(searchDistrict, districtGeo)
+    ) {
+      setPopupDistrict(null);
+      setPopupData(null);
       return;
     }
 
-    const dates = history
-      .map(f => new Date(f.acq_date))
-      .filter(d => !isNaN(d));
-
-    setPopupStats({
-      total: history.length,
-      firstFire: dates.length
-        ? new Date(Math.min(...dates)).toISOString().split("T")[0]
-        : "N/A",
-      lastFire: dates.length
-        ? new Date(Math.max(...dates)).toISOString().split("T")[0]
-        : "N/A",
-    });
-  };
-
-  useEffect(() => {
-    if (searchDistrict) openPopup(searchDistrict);
-  }, [searchDistrict]);
+    openPopup(searchDistrict);
+  }, [searchDistrict, dataMode, districtGeo]);
 
   /* ===============================
      FILTER MAP FIRES
@@ -169,6 +176,9 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
   const fireColor = (b) =>
     b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
 
+  /* ===============================
+     RENDER
+  ================================ */
   return (
     <div className="map-container">
 
@@ -180,9 +190,14 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
         >
           Historical
         </button>
+
         <button
           className={dataMode === "realtime" ? "active" : ""}
-          onClick={() => setDataMode("realtime")}
+          onClick={() => {
+            setDataMode("realtime");
+            setPopupDistrict(null);
+            setPopupData(null);
+          }}
         >
           FIRMS
         </button>
@@ -190,11 +205,7 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
 
       <MapContainer center={[22.6, 79]} zoom={5} preferCanvas>
         <TileLayer
-          url={
-            basemap === "satellite"
-              ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          }
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         />
 
         {districtGeo && (
@@ -231,27 +242,46 @@ const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
         )}
       </MapContainer>
 
-      {popupDistrict && popupStats && (
+      {/* POPUP */}
+      {popupDistrict && popupData && (
         <div className="history-popup">
-          <h3>{formatDistrict(popupDistrict)}</h3>
+          <div className="history-popup-header">
+            <h3>{formatDistrict(popupDistrict)}</h3>
+            <button
+              className="history-popup-close"
+              onClick={() => {
+                setPopupDistrict(null);
+                setPopupData(null);
+              }}
+            >
+              ✕
+            </button>
+          </div>
 
-          {popupStats.empty ? (
-            <p className="muted">
-              No historical fire records available for this district
-            </p>
-          ) : (
-            <>
-              <p><b>Total Historical Fires:</b> {popupStats.total}</p>
-              <p><b>First Fire:</b> {popupStats.firstFire}</p>
-              <p><b>Last Fire:</b> {popupStats.lastFire}</p>
-            </>
-          )}
+          <div className="history-popup-body">
+            {popupData.totalFires === 0 ? (
+              <p className="muted">No historical fire records available</p>
+            ) : (
+              <div className="history-stats">
+                <div className="history-stat">
+                  <span className="label">Total Fires</span>
+                  <span className="value">{popupData.totalFires}</span>
+                </div>
+                <div className="history-stat">
+                  <span className="label">First Recorded</span>
+                  <span className="value">{popupData.firstFireDate}</span>
+                </div>
+                <div className="history-stat">
+                  <span className="label">Last Recorded</span>
+                  <span className="value">{popupData.lastFireDate}</span>
+                </div>
+              </div>
+            )}
 
-          <p className="popup-note">
-            Historical data derived from NASA FIRMS archives
-          </p>
-
-          <button onClick={() => setPopupDistrict(null)}>Close</button>
+            <div className="history-footer">
+              Historical data derived from NASA FIRMS archives
+            </div>
+          </div>
         </div>
       )}
     </div>
