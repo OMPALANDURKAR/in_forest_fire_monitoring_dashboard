@@ -9,6 +9,7 @@ const express = require("express");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
+const compression = require("compression");
 
 // ================================
 // APP INIT
@@ -93,10 +94,28 @@ app.get("/api/fires", (req, res) => {
 });
 
 // 🔴 REALTIME FIRE DATA
-app.get("/api/fires-realtime", (req, res) => {
-  loadRealtimeFires();
-  res.json(realtimeFires.slice(0, MAX_REALTIME_FIRES));
+// 🔴 REAL-TIME STATUS (FIRMS NRT ONLY)
+app.get("/api/realtime/:district", (req, res) => {
+  loadRealtimeFires(); // ✅ FIRMS NRT data ONLY
+
+  const district = req.params.district.toLowerCase();
+
+  const matches = realtimeFires.filter(
+    f => f.district?.toLowerCase() === district
+  );
+
+  res.json({
+    district,
+    activeFires: matches.length,
+    status:
+      matches.length > 0
+        ? "Active Fires Detected"
+        : "No Active Fires",
+    source: "NASA FIRMS (Near Real-Time)",
+    lastUpdated: new Date().toISOString(),
+  });
 });
+
 
 // 📊 DISTRICT RISK SUMMARY
 app.get("/api/district-risk", (req, res) => {
