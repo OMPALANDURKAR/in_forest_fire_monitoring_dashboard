@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import "./styles/firemap.css";
 import "./styles/dashboard.css";
-import DistrictPopup from "./components/DistrictPopup";
 import Header from "./components/Header";
 import SidebarFilters from "./components/SidebarFilters";
 import Analytics from "./components/Analytics";
