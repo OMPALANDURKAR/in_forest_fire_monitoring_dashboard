@@ -26,14 +26,14 @@ app.use(express.json());
 app.use(compression());
 
 // ================================
-// 🔥 LIGHTWEIGHT HEALTH CHECK
+// 🔥 HEALTH CHECK
 // ================================
 app.get("/", (req, res) => {
   res.status(200).send("OK");
 });
 
 // ================================
-// IN-MEMORY CACHES (LAZY LOADED)
+// IN-MEMORY CACHES
 // ================================
 let historicalFires = null;
 let realtimeFires = null;
@@ -46,7 +46,15 @@ let districtsGeoJSON = null;
 const MAX_HISTORICAL_FIRES = 300;
 
 // ================================
-// HELPER LOADERS
+// HELPERS
+// ================================
+const normalize = (name) =>
+  name
+    ? name.toLowerCase().replace(/district/g, "").replace(/\s+/g, "").trim()
+    : "";
+
+// ================================
+// LOADERS
 // ================================
 function loadHistoricalFires() {
   if (!historicalFires) {
@@ -87,20 +95,20 @@ function loadDistrictsGeoJSON() {
 // ROUTES
 // ================================
 
-// 🔥 HISTORICAL FIRE DATA (MAP + ANALYTICS)
+// 🔥 HISTORICAL FIRE DATA
 app.get("/api/fires", (req, res) => {
   loadHistoricalFires();
   res.json(historicalFires.slice(0, MAX_HISTORICAL_FIRES));
 });
 
-// 🔴 REAL-TIME STATUS (FIRMS NRT ONLY) ✅ FIXED
+// 🔴 REAL-TIME STATUS (FIRMS)
 app.get("/api/realtime/:district", (req, res) => {
   loadRealtimeFires();
 
-  const district = req.params.district.toLowerCase();
+  const district = normalize(req.params.district);
 
   const matches = realtimeFires.filter(
-    f => f.district?.toLowerCase() === district
+    f => normalize(f.district) === district
   );
 
   res.json({
@@ -121,21 +129,20 @@ app.get("/api/district-risk", (req, res) => {
   res.json(districtRisk);
 });
 
-// 🗺️ DISTRICT BOUNDARIES
+// 🗺️ DISTRICT GEOJSON
 app.get("/api/districts", (req, res) => {
   loadDistrictsGeoJSON();
   res.json(districtsGeoJSON);
 });
 
-// 🔮 FUTURE RISK PREDICTION (HISTORICAL-BASED)
-// 🔮 AI RISK OUTLOOK (LOGIC-BASED, HISTORICAL)
+// 🔮 AI RISK OUTLOOK (HISTORICAL LOGIC)
 app.get("/api/predict/:district", (req, res) => {
   loadHistoricalFires();
 
-  const district = req.params.district.toLowerCase();
+  const district = normalize(req.params.district);
 
   const count = historicalFires.filter(
-    f => f.district?.toLowerCase() === district
+    f => normalize(f.district) === district
   ).length;
 
   let riskLevel = "Low";
@@ -158,28 +165,17 @@ app.get("/api/predict/:district", (req, res) => {
   });
 });
 
-// 🔻 404 HANDLER
-app.use((req, res) => {
-  res.status(404).json({ error: "Route not found" });
-});
-
-// ================================
-// START SERVER
-// ================================
-app.listen(PORT, () => {
-  console.log(`🚀 Backend running on port ${PORT}`);
-});
-// 📊 HISTORICAL SUMMARY FOR A DISTRICT (POPUP DATA)
+// 📊 ✅ DISTRICT HISTORY (POPUP — FINAL FIX)
 app.get("/api/history/:district", (req, res) => {
   loadHistoricalFires();
 
-  const district = req.params.district.toLowerCase();
+  const district = normalize(req.params.district);
 
   const fires = historicalFires.filter(
-    f => f.district?.toLowerCase() === district
+    f => normalize(f.district) === district
   );
 
-  if (fires.length === 0) {
+  if (!fires.length) {
     return res.json({
       district,
       totalFires: 0,
@@ -189,13 +185,27 @@ app.get("/api/history/:district", (req, res) => {
     });
   }
 
-  // Assuming fires are already sorted by date (if not, this still works safely)
-  const dates = fires.map(f => f.acq_date).sort();
+  const dates = fires
+    .map(f => new Date(f.acq_date))
+    .filter(d => !isNaN(d))
+    .sort((a, b) => a - b);
 
   res.json({
     district,
     totalFires: fires.length,
-    firstFireDate: dates[0],
-    lastFireDate: dates[dates.length - 1],
+    firstFireDate: dates[0].toISOString().split("T")[0],
+    lastFireDate: dates[dates.length - 1].toISOString().split("T")[0],
   });
+});
+
+// 🔻 404
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+// ================================
+// START SERVER
+// ================================
+app.listen(PORT, () => {
+  console.log(`🚀 Backend running on port ${PORT}`);
 });
