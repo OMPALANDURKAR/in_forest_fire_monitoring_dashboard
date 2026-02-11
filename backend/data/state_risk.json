@@ -1,0 +1,157 @@
+[
+  {
+    "state": "Karnataka",
+    "fireCount": 3290,
+    "risk": "High"
+  },
+  {
+    "state": "Andhra Pradesh",
+    "fireCount": 5358,
+    "risk": "High"
+  },
+  {
+    "state": "Madhya Pradesh",
+    "fireCount": 10273,
+    "risk": "High"
+  },
+  {
+    "state": "Chhattisgarh",
+    "fireCount": 10390,
+    "risk": "High"
+  },
+  {
+    "state": "Jharkhand",
+    "fireCount": 3776,
+    "risk": "High"
+  },
+  {
+    "state": "Meghalaya",
+    "fireCount": 120,
+    "risk": "High"
+  },
+  {
+    "state": "Maharashtra",
+    "fireCount": 3413,
+    "risk": "High"
+  },
+  {
+    "state": "Orissa",
+    "fireCount": 4408,
+    "risk": "High"
+  },
+  {
+    "state": "West Bengal",
+    "fireCount": 3315,
+    "risk": "High"
+  },
+  {
+    "state": "Bihar",
+    "fireCount": 3687,
+    "risk": "High"
+  },
+  {
+    "state": "Assam",
+    "fireCount": 550,
+    "risk": "High"
+  },
+  {
+    "state": "Uttar Pradesh",
+    "fireCount": 6295,
+    "risk": "High"
+  },
+  {
+    "state": "Gujarat",
+    "fireCount": 1500,
+    "risk": "High"
+  },
+  {
+    "state": "Manipur",
+    "fireCount": 166,
+    "risk": "High"
+  },
+  {
+    "state": "Arunachal Pradesh",
+    "fireCount": 292,
+    "risk": "High"
+  },
+  {
+    "state": "Punjab",
+    "fireCount": 254,
+    "risk": "High"
+  },
+  {
+    "state": "Haryana",
+    "fireCount": 353,
+    "risk": "High"
+  },
+  {
+    "state": "Rajasthan",
+    "fireCount": 1164,
+    "risk": "High"
+  },
+  {
+    "state": "Uttaranchal",
+    "fireCount": 880,
+    "risk": "High"
+  },
+  {
+    "state": "Jammu and Kashmir",
+    "fireCount": 332,
+    "risk": "High"
+  },
+  {
+    "state": "Himachal Pradesh",
+    "fireCount": 240,
+    "risk": "High"
+  },
+  {
+    "state": "Goa",
+    "fireCount": 47,
+    "risk": "Medium"
+  },
+  {
+    "state": "Mizoram",
+    "fireCount": 14,
+    "risk": "Low"
+  },
+  {
+    "state": "Nagaland",
+    "fireCount": 108,
+    "risk": "High"
+  },
+  {
+    "state": "Tamil Nadu",
+    "fireCount": 147,
+    "risk": "High"
+  },
+  {
+    "state": "Kerala",
+    "fireCount": 32,
+    "risk": "Low"
+  },
+  {
+    "state": "Delhi",
+    "fireCount": 28,
+    "risk": "Low"
+  },
+  {
+    "state": "Daman and Diu",
+    "fireCount": 13,
+    "risk": "Low"
+  },
+  {
+    "state": "Tripura",
+    "fireCount": 2,
+    "risk": "Low"
+  },
+  {
+    "state": "Dadra and Nagar Haveli",
+    "fireCount": 1,
+    "risk": "Low"
+  },
+  {
+    "state": "Sikkim",
+    "fireCount": 6,
+    "risk": "Low"
+  }
+]

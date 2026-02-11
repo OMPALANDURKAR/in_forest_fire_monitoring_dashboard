@@ -15,12 +15,17 @@ const API_BASE =
   "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 function App() {
+
   /* ===============================
      GLOBAL STATES
   ================================ */
 
-  // 🔍 Search input (SINGLE SOURCE OF TRUTH)
+  // 🔍 Search input
   const [searchDistrict, setSearchDistrict] = useState("");
+
+  // 🗺 Selected region (GLOBAL SOURCE)
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
 
   // 🎚 Risk filters
   const [riskFilter, setRiskFilter] = useState({
@@ -42,19 +47,19 @@ function App() {
   const [loadingFuture, setLoadingFuture] = useState(false);
 
   /* ===============================
-     REAL-TIME FIRE STATUS (FIRMS)
+     RESET WHEN SEARCH CLEARED
+  ================================ */
+ 
+
+  /* ===============================
+     REAL-TIME FIRE STATUS
   ================================ */
   useEffect(() => {
-    if (!searchDistrict) {
-      setRealtimeInfo(null);
-      return;
-    }
+    if (!searchDistrict) return;
 
     setLoadingRealtime(true);
 
-    fetch(
-      `${API_BASE}/api/realtime/${searchDistrict.toLowerCase()}`
-    )
+    fetch(`${API_BASE}/api/realtime/${searchDistrict.toLowerCase()}`)
       .then(res => {
         if (!res.ok) throw new Error("Realtime API failed");
         return res.json();
@@ -62,27 +67,22 @@ function App() {
       .then(data => {
         setRealtimeInfo(data || null);
       })
-      .catch(err => {
-        console.error("❌ Realtime fetch error:", err);
+      .catch(() => {
         setRealtimeInfo(null);
       })
       .finally(() => setLoadingRealtime(false));
+
   }, [searchDistrict]);
 
   /* ===============================
-     AI RISK OUTLOOK (HISTORICAL)
+     AI RISK OUTLOOK
   ================================ */
   useEffect(() => {
-    if (!searchDistrict) {
-      setFutureRisk(null);
-      return;
-    }
+    if (!searchDistrict) return;
 
     setLoadingFuture(true);
 
-    fetch(
-      `${API_BASE}/api/predict/${searchDistrict.toLowerCase()}`
-    )
+    fetch(`${API_BASE}/api/predict/${searchDistrict.toLowerCase()}`)
       .then(res => {
         if (!res.ok) throw new Error("Predict API failed");
         return res.json();
@@ -90,11 +90,11 @@ function App() {
       .then(data => {
         setFutureRisk(data || null);
       })
-      .catch(err => {
-        console.error("❌ Prediction fetch error:", err);
+      .catch(() => {
         setFutureRisk(null);
       })
       .finally(() => setLoadingFuture(false));
+
   }, [searchDistrict]);
 
   /* ===============================
@@ -105,20 +105,16 @@ function App() {
       <Header />
 
       <div className="main-layout">
+
         {/* LEFT SIDEBAR */}
         <SidebarFilters
           searchDistrict={searchDistrict}
           setSearchDistrict={setSearchDistrict}
-          riskFilter={riskFilter}
-          setRiskFilter={setRiskFilter}
-          dateFrom={dateFrom}
-          setDateFrom={setDateFrom}
-          dateTo={dateTo}
-          setDateTo={setDateTo}
           realtimeInfo={realtimeInfo}
           futureRisk={futureRisk}
           loadingRealtime={loadingRealtime}
           loadingFuture={loadingFuture}
+          selectedType={selectedState ? "state" : "district"}
         />
 
         {/* CENTER MAP */}
@@ -127,12 +123,18 @@ function App() {
           riskFilter={riskFilter}
           dateFrom={dateFrom}
           dateTo={dateTo}
+          selectedState={selectedState}
+          setSelectedState={setSelectedState}
+          selectedDistrict={selectedDistrict}
+          setSelectedDistrict={setSelectedDistrict}
         />
 
         {/* RIGHT PANEL */}
         <Analytics
-          searchDistrict={searchDistrict}
+          selectedState={selectedState}
+          popupDistrict={selectedDistrict}
         />
+
       </div>
     </div>
   );

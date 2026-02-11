@@ -8,9 +8,9 @@ const API_BASE =
   "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 /* ===============================
-   ANALYTICS PANEL (FIRMS NRT – FINAL)
+   ANALYTICS PANEL (DYNAMIC)
 ================================ */
-const Analytics = () => {
+const Analytics = ({ selectedState, popupDistrict }) => {
   const [summary, setSummary] = useState({
     total: 0,
     High: 0,
@@ -21,13 +21,30 @@ const Analytics = () => {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [lastUpdatedTime, setLastUpdatedTime] = useState(null);
 
+  const [title, setTitle] = useState("Near Real-Time Fire Overview");
+
   /* ===============================
-     FETCH FIRMS NRT DATA (ONLY SOURCE)
+     FETCH BASED ON CONTEXT
   ================================ */
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`${API_BASE}/api/fires-realtime`)
+    let endpoint = `${API_BASE}/api/fires-realtime`;
+    let contextTitle = "India - Near Real-Time Fire Overview";
+
+    if (selectedState) {
+      endpoint = `${API_BASE}/api/fires-realtime/state/${selectedState}`;
+      contextTitle = `${selectedState} - Near Real-Time Overview`;
+    }
+
+    if (popupDistrict) {
+      endpoint = `${API_BASE}/api/fires-realtime/district/${popupDistrict}`;
+      contextTitle = `${popupDistrict} - Near Real-Time Overview`;
+    }
+
+    setTitle(contextTitle);
+
+    fetch(endpoint)
       .then(res => res.json())
       .then(data => {
         if (!Array.isArray(data) || cancelled) return;
@@ -54,6 +71,9 @@ const Analytics = () => {
 
           setLastUpdated(latest.acq_date);
           setLastUpdatedTime(latest.acq_time);
+        } else {
+          setLastUpdated(null);
+          setLastUpdatedTime(null);
         }
       })
       .catch(() => {
@@ -65,16 +85,18 @@ const Analytics = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [selectedState, popupDistrict]);
 
   /* ===============================
      RENDER
   ================================ */
   return (
     <section className="analytics-section">
+
       {/* HEADER */}
       <div className="analytics-header">
-        <h2>Near Real-Time Fire Overview</h2>
+        <h2>{title}</h2>
+
         {lastUpdated && (
           <div className="subtext">
             Last satellite update: {lastUpdated} {lastUpdatedTime}
@@ -84,6 +106,7 @@ const Analytics = () => {
 
       {/* SUMMARY CARDS */}
       <div className="analytics-grid">
+
         <div className="stat-card">
           <div className="stat-label">Active Fires</div>
           <div className="stat-value">{summary.total}</div>
@@ -103,24 +126,22 @@ const Analytics = () => {
           <div className="stat-label">Low</div>
           <div className="stat-value">{summary.Low}</div>
         </div>
+
       </div>
 
-      {/* ===============================
-         FIRE SEVERITY DISTRIBUTION (EYE CATCHY)
-      ================================ */}
+      {/* DONUT CHART */}
       <div className="fire-chart-card">
         <h3 className="chart-title">Fire Severity Distribution</h3>
 
         <div
-  className="donut-chart animate"
-  style={{
-    "--high": summary.High,
-    "--medium": summary.Medium,
-    "--low": summary.Low,
-    "--total": summary.total || 1
-  }}
-/>
-
+          className="donut-chart animate"
+          style={{
+            "--high": summary.High,
+            "--medium": summary.Medium,
+            "--low": summary.Low,
+            "--total": summary.total || 1
+          }}
+        />
 
         <div className="chart-legend">
           <div><span className="dot high" /> High</div>
@@ -128,6 +149,7 @@ const Analytics = () => {
           <div><span className="dot low" /> Low</div>
         </div>
       </div>
+
     </section>
   );
 };

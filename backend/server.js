@@ -29,7 +29,7 @@ app.use(compression());
 // 🔥 HEALTH CHECK
 // ================================
 app.get("/", (req, res) => {
-  res.status(200).send("OK");
+  res.status(200).json({ status: "OK" });
 });
 
 // ================================
@@ -39,6 +39,8 @@ let historicalFires = null;
 let realtimeFires = null;
 let districtRisk = null;
 let districtsGeoJSON = null;
+let statesGeoJSON = null;
+let stateRisk = null;
 
 // ================================
 // CONFIG
@@ -77,6 +79,13 @@ function loadDistrictRisk() {
   }
 }
 
+function loadStateRisk() {
+  if (!stateRisk) {
+    stateRisk = require("./data/state_risk.json");
+    console.log("✅ Loaded state_risk.json");
+  }
+}
+
 function loadDistrictsGeoJSON() {
   if (!districtsGeoJSON) {
     districtsGeoJSON = JSON.parse(
@@ -91,6 +100,20 @@ function loadDistrictsGeoJSON() {
   }
 }
 
+function loadStatesGeoJSON() {
+  if (!statesGeoJSON) {
+    statesGeoJSON = JSON.parse(
+      fs.readFileSync(
+        path.join(__dirname, "data", "india_states.geojson"),
+        "utf8"
+      )
+    );
+    console.log(
+      `✅ Loaded india_states.geojson (${statesGeoJSON.features.length} features)`
+    );
+  }
+}
+
 // ================================
 // ROUTES
 // ================================
@@ -101,14 +124,14 @@ app.get("/api/fires", (req, res) => {
   res.json(historicalFires.slice(0, MAX_HISTORICAL_FIRES));
 });
 
-// 🔴 REAL-TIME STATUS (FIRMS)
+// 🔴 REAL-TIME STATUS (DISTRICT)
 app.get("/api/realtime/:district", (req, res) => {
   loadRealtimeFires();
 
   const district = normalize(req.params.district);
 
   const matches = realtimeFires.filter(
-    f => normalize(f.district) === district
+    (f) => normalize(f.district) === district
   );
 
   res.json({
@@ -123,26 +146,49 @@ app.get("/api/realtime/:district", (req, res) => {
   });
 });
 
-// 📊 DISTRICT RISK SUMMARY
+// 📊 DISTRICT RISK
 app.get("/api/district-risk", (req, res) => {
   loadDistrictRisk();
   res.json(districtRisk);
 });
 
-// 🗺️ DISTRICT GEOJSON
-app.get("/api/districts", (req, res) => {
-  loadDistrictsGeoJSON();
-  res.json(districtsGeoJSON);
+// 📊 STATE RISK
+app.get("/api/state-risk", (req, res) => {
+  loadStateRisk();
+  res.json(stateRisk);
 });
 
-// 🔮 AI RISK OUTLOOK (HISTORICAL LOGIC)
+// 🗺️ DISTRICT GEOJSON
+app.get("/api/districts", (req, res) => {
+  try {
+    loadDistrictsGeoJSON();
+    res.json(districtsGeoJSON);
+  } catch (err) {
+    console.error("❌ District GeoJSON error:", err);
+    res.status(500).json({ error: "Failed to load district GeoJSON" });
+  }
+});
+
+// 🗺️ STATE GEOJSON (CRITICAL)
+app.get("/api/states", (req, res) => {
+  try {
+    loadStatesGeoJSON();
+    console.log("📍 /api/states requested");
+    res.json(statesGeoJSON);
+  } catch (err) {
+    console.error("❌ State GeoJSON error:", err);
+    res.status(500).json({ error: "Failed to load state GeoJSON" });
+  }
+});
+
+// 🔮 AI PREDICT
 app.get("/api/predict/:district", (req, res) => {
   loadHistoricalFires();
 
   const district = normalize(req.params.district);
 
   const count = historicalFires.filter(
-    f => normalize(f.district) === district
+    (f) => normalize(f.district) === district
   ).length;
 
   let riskLevel = "Low";
@@ -165,14 +211,14 @@ app.get("/api/predict/:district", (req, res) => {
   });
 });
 
-// 📊 ✅ DISTRICT HISTORY (POPUP — FINAL FIX)
+// 📊 DISTRICT HISTORY
 app.get("/api/history/:district", (req, res) => {
   loadHistoricalFires();
 
   const district = normalize(req.params.district);
 
   const fires = historicalFires.filter(
-    f => normalize(f.district) === district
+    (f) => normalize(f.district) === district
   );
 
   if (!fires.length) {
@@ -186,8 +232,8 @@ app.get("/api/history/:district", (req, res) => {
   }
 
   const dates = fires
-    .map(f => new Date(f.acq_date))
-    .filter(d => !isNaN(d))
+    .map((f) => new Date(f.acq_date))
+    .filter((d) => !isNaN(d))
     .sort((a, b) => a - b);
 
   res.json({
@@ -197,7 +243,8 @@ app.get("/api/history/:district", (req, res) => {
     lastFireDate: dates[dates.length - 1].toISOString().split("T")[0],
   });
 });
-// 🔴 FIRMS NEAR REAL-TIME (ALL INDIA)
+
+// 🔴 ALL INDIA REALTIME
 app.get("/api/fires-realtime", (req, res) => {
   loadRealtimeFires();
   res.json(realtimeFires);

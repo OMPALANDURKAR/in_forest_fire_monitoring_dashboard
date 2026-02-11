@@ -6,6 +6,7 @@ import {
   useMap
 } from "react-leaflet";
 import { useEffect, useMemo, useState } from "react";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./styles/firemap.css";
 
@@ -17,292 +18,283 @@ const API_BASE =
   "https://in-forest-fire-monitoring-dashboard.onrender.com";
 
 /* ===============================
-   UTILS (STRICT NORMALIZATION)
+   UTILS
 ================================ */
 const normalize = (name) =>
   name
-    ? name
-        .toLowerCase()
-        .replace(/district/g, "")
-        .replace(/[^a-z]/g, "")
-        .trim()
+    ? name.toLowerCase().replace(/district/g, "").replace(/[^a-z]/g, "").trim()
     : "";
 
-const formatDistrict = (name) =>
-  name ? name.charAt(0).toUpperCase() + name.slice(1) : "";
+const normalizeState = (name) =>
+  name
+    ? name.toLowerCase().replace(/&/g, "and").replace(/[^a-z]/g, "").trim()
+    : "";
 
 const getDistrictName = (p) =>
   p?.DISTRICT || p?.district || p?.NAME_3 || p?.NAME_2 || p?.dtname || null;
 
-/* ===============================
-   VALID DISTRICT CHECK
-================================ */
-const isValidDistrict = (name, geo) => {
-  if (!name || !geo?.features) return false;
-  const target = normalize(name);
+const getStateName = (p) =>
+  p?.st_nm ||
+  p?.STATE ||
+  p?.STATE_NAME ||
+  p?.State_Name ||
+  p?.NAME_1 ||
+  null;
 
-  return geo.features.some(f => {
-    const d = getDistrictName(f.properties);
-    return normalize(d) === target;
-  });
-};
+const isValidGeoJSON = (geo) =>
+  geo &&
+  geo.type === "FeatureCollection" &&
+  Array.isArray(geo.features) &&
+  geo.features.length > 0;
 
 /* ===============================
-   MAP FOCUS HANDLER
+   MAP PANES
 ================================ */
-const FocusDistrict = ({ districtGeo, searchDistrict }) => {
+const MapPanes = () => {
   const map = useMap();
 
   useEffect(() => {
-    if (!isValidDistrict(searchDistrict, districtGeo)) return;
-
-    const target = normalize(searchDistrict);
-    const feature = districtGeo.features.find(f => {
-      const name = getDistrictName(f.properties);
-      return normalize(name) === target;
-    });
-
-    if (!feature) return;
-
-    try {
-      const bounds = feature.geometry.coordinates[0].map(
-        ([lng, lat]) => [lat, lng]
-      );
-      map.fitBounds(bounds, { padding: [40, 40] });
-    } catch {}
-  }, [searchDistrict, districtGeo, map]);
+    if (!map.getPane("statesPane")) {
+      map.createPane("statesPane");
+      map.getPane("statesPane").style.zIndex = 400;
+    }
+    if (!map.getPane("districtsPane")) {
+      map.createPane("districtsPane");
+      map.getPane("districtsPane").style.zIndex = 300;
+    }
+  }, [map]);
 
   return null;
 };
 
-/* ==================================================
+/* ===============================
+   FOCUS STATE
+================================ */
+const FocusState = ({ stateGeo, selectedState }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!isValidGeoJSON(stateGeo) || !selectedState) return;
+
+    const feature = stateGeo.features.find(
+      (f) =>
+        normalizeState(getStateName(f.properties)) ===
+        normalizeState(selectedState)
+    );
+
+    if (!feature) return;
+
+    const layer = L.geoJSON(feature);
+    map.fitBounds(layer.getBounds(), { padding: [60, 60] });
+  }, [stateGeo, selectedState, map]);
+
+  return null;
+};
+
+/* ===============================
+   FOCUS DISTRICT
+================================ */
+const FocusDistrict = ({ districtGeo, selectedDistrict }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!isValidGeoJSON(districtGeo) || !selectedDistrict) return;
+
+    const feature = districtGeo.features.find(
+      (f) =>
+        normalize(getDistrictName(f.properties)) ===
+        normalize(selectedDistrict)
+    );
+
+    if (!feature) return;
+
+    const layer = L.geoJSON(feature);
+    map.fitBounds(layer.getBounds(), { padding: [50, 50] });
+  }, [districtGeo, selectedDistrict, map]);
+
+  return null;
+};
+
+/* ===============================
    MAIN COMPONENT
-================================================== */
-const FireMap = ({ searchDistrict, riskFilter, dateFrom, dateTo }) => {
-  /* ===============================
-     MAP DATA
-  ================================ */
+================================ */
+const FireMap = ({
+  searchDistrict,
+  riskFilter,
+  dateFrom,
+  dateTo,
+  selectedState,
+  setSelectedState,
+  selectedDistrict,
+  setSelectedDistrict
+}) => {
+
   const [mapFires, setMapFires] = useState([]);
   const [districtGeo, setDistrictGeo] = useState(null);
-  const [dataMode, setDataMode] = useState("historical");
+  const [stateGeo, setStateGeo] = useState(null);
+  const [stateRisk, setStateRisk] = useState([]);
 
-  /* 🔥 BASEMAP STATE (FIX) */
-  const [basemap, setBasemap] = useState("satellite");
-
-  /* ===============================
-     POPUP STATE
-  ================================ */
-  const [popupDistrict, setPopupDistrict] = useState(null);
-  const [popupData, setPopupData] = useState(null);
-
-  /* ===============================
-     FETCH MAP FIRES
-  ================================ */
+  /* FETCH DATA */
   useEffect(() => {
-    const url =
-      dataMode === "historical"
-        ? `${API_BASE}/api/fires`
-        : `${API_BASE}/api/fires-realtime`;
-
-    fetch(url)
-      .then(res => res.json())
-      .then(data => setMapFires(Array.isArray(data) ? data : []))
-      .catch(() => setMapFires([]));
-  }, [dataMode]);
-
-  /* ===============================
-     FETCH DISTRICTS
-  ================================ */
-  useEffect(() => {
-    fetch(`${API_BASE}/api/districts`)
-      .then(res => res.json())
-      .then(setDistrictGeo)
-      .catch(() => {});
+    fetch(`${API_BASE}/api/fires`).then(r => r.json()).then(setMapFires);
+    fetch(`${API_BASE}/api/districts`).then(r => r.json()).then(setDistrictGeo);
+    fetch(`${API_BASE}/api/states`).then(r => r.json()).then(setStateGeo);
+    fetch(`${API_BASE}/api/state-risk`).then(r => r.json()).then(setStateRisk);
   }, []);
 
   /* ===============================
-     OPEN POPUP (BACKEND)
-  ================================ */
-  const openPopup = async (district) => {
-    try {
-      const res = await fetch(
-        `${API_BASE}/api/history/${normalize(district)}`
-      );
-      const data = await res.json();
-
-      setPopupDistrict(district);
-      setPopupData(data);
-    } catch {
-      setPopupDistrict(district);
-      setPopupData({ totalFires: 0 });
-    }
-  };
-
-  /* ===============================
-     SEARCH → POPUP (SINGLE SOURCE)
+     SEARCH HANDLER (FINAL)
   ================================ */
   useEffect(() => {
-    if (
-      dataMode !== "historical" ||
-      !isValidDistrict(searchDistrict, districtGeo)
-    ) {
-      setPopupDistrict(null);
-      setPopupData(null);
+    if (!searchDistrict) {
+      setSelectedState(null);
+      setSelectedDistrict(null);
       return;
     }
-    openPopup(searchDistrict);
-  }, [searchDistrict, dataMode, districtGeo]);
 
-  /* ===============================
-     FILTER MAP FIRES
-  ================================ */
+    let matched = false;
+
+    // 🔵 STATE SEARCH
+    if (isValidGeoJSON(stateGeo)) {
+      const stateMatch = stateGeo.features.find((f) => {
+        const stateName = getStateName(f.properties);
+        return (
+          stateName &&
+          normalizeState(stateName) === normalizeState(searchDistrict)
+        );
+      });
+
+      if (stateMatch) {
+        const stateName = getStateName(stateMatch.properties);
+        setSelectedState(stateName);
+        setSelectedDistrict(null);
+        matched = true;
+      }
+    }
+
+    // 🟢 DISTRICT SEARCH
+    if (!matched && isValidGeoJSON(districtGeo)) {
+      const districtMatch = districtGeo.features.find((f) => {
+        const districtName = getDistrictName(f.properties);
+        return (
+          districtName &&
+          normalize(districtName) === normalize(searchDistrict)
+        );
+      });
+
+      if (districtMatch) {
+        const districtName = getDistrictName(districtMatch.properties);
+        setSelectedDistrict(districtName);
+        setSelectedState(null);
+        matched = true;
+      }
+    }
+
+    // ❌ If nothing matched → clear selection
+    if (!matched) {
+      setSelectedState(null);
+      setSelectedDistrict(null);
+    }
+
+  }, [
+    searchDistrict,
+    stateGeo,
+    districtGeo,
+    setSelectedState,
+    setSelectedDistrict
+  ]);
+
+  /* FILTER FIRES */
   const finalFires = useMemo(() => {
-    return mapFires
-      .filter(f => {
-        if (f.brightness > 350 && !riskFilter.high) return false;
-        if (f.brightness >= 300 && f.brightness <= 350 && !riskFilter.medium)
-          return false;
-        if (f.brightness < 300 && !riskFilter.low) return false;
+    return mapFires.filter((f) => {
+      if (f.brightness > 350 && !riskFilter.high) return false;
+      if (f.brightness >= 300 && f.brightness <= 350 && !riskFilter.medium) return false;
+      if (f.brightness < 300 && !riskFilter.low) return false;
 
-        if (dateFrom && dateTo) {
-          const d = new Date(f.acq_date);
-          return d >= new Date(dateFrom) && d <= new Date(dateTo);
-        }
-        return true;
-      })
-      .slice(0, 400);
+      if (dateFrom && dateTo) {
+        const d = new Date(f.acq_date);
+        return d >= new Date(dateFrom) && d <= new Date(dateTo);
+      }
+
+      return true;
+    });
   }, [mapFires, riskFilter, dateFrom, dateTo]);
 
   const fireColor = (b) =>
-    b > 350 ? "#dc2626" : b >= 300 ? "#f59e0b" : "#16a34a";
+    b > 350 ? "#dc2626" :
+    b >= 300 ? "#f59e0b" :
+    "#16a34a";
 
-  /* ===============================
-     RENDER
-  ================================ */
+  const getRiskColor = (r) =>
+    r === "High" ? "#dc2626" :
+    r === "Medium" ? "#f59e0b" :
+    "#16a34a";
+
   return (
     <div className="map-container">
+      <MapContainer center={[22.6, 79]} zoom={5}>
+        <MapPanes />
 
-      {/* DATA MODE TOGGLE */}
-      <div className="data-toggle">
-        <button
-          className={dataMode === "historical" ? "active" : ""}
-          onClick={() => setDataMode("historical")}
-        >
-          Historical
-        </button>
-        <button
-          className={dataMode === "realtime" ? "active" : ""}
-          onClick={() => {
-            setDataMode("realtime");
-            setPopupDistrict(null);
-            setPopupData(null);
-          }}
-        >
-          FIRMS
-        </button>
-      </div>
-
-      {/* 🔥 BASEMAP TOGGLE (RESTORED) */}
-      <div className="basemap-toggle">
-        <button
-          className={basemap === "street" ? "active" : ""}
-          onClick={() => setBasemap("street")}
-        >
-          Street
-        </button>
-        <button
-          className={basemap === "satellite" ? "active" : ""}
-          onClick={() => setBasemap("satellite")}
-        >
-          Satellite
-        </button>
-      </div>
-
-      <MapContainer center={[22.6, 79]} zoom={5} preferCanvas>
         <TileLayer
-          url={
-            basemap === "satellite"
-              ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          }
+          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         />
 
-        {districtGeo && (
+        {/* STATES */}
+        {isValidGeoJSON(stateGeo) && (
           <GeoJSON
-            data={districtGeo}
-            style={{ color: "#64748b", weight: 0.6, fillOpacity: 0 }}
-            onEachFeature={(feature, layer) => {
-              layer.on("click", () => {
-                const name = getDistrictName(feature.properties);
-                if (name) openPopup(name);
-              });
+            pane="statesPane"
+            data={stateGeo}
+            style={(feature) => {
+              const stateName = getStateName(feature.properties);
+
+              const risk = stateRisk.find(
+                (s) =>
+                  normalizeState(s.state) ===
+                  normalizeState(stateName)
+              );
+
+              const active =
+                normalizeState(stateName) ===
+                normalizeState(selectedState);
+
+              return {
+                fillColor: getRiskColor(risk?.risk),
+                fillOpacity: active ? 0.6 : 0.2,
+                weight: active ? 3 : 1,
+                color: active ? "#000" : "#64748b"
+              };
             }}
           />
         )}
 
-        {finalFires.map((f, idx) => (
+        {/* DISTRICTS */}
+        {isValidGeoJSON(districtGeo) && (
+          <GeoJSON
+            pane="districtsPane"
+            data={districtGeo}
+            style={{
+              color: "#94a3b8",
+              weight: 0.5,
+              fillOpacity: 0,
+              interactive: false
+            }}
+          />
+        )}
+
+        {/* FIRE MARKERS */}
+        {finalFires.map((f, i) => (
           <CircleMarker
-            key={idx}
+            key={i}
             center={[+f.latitude, +f.longitude]}
             radius={3}
-            pathOptions={{
-              color: fireColor(f.brightness),
-              fillOpacity: 0.7,
-              weight: 0,
-            }}
+            pathOptions={{ color: fireColor(f.brightness) }}
           />
         ))}
 
-        {districtGeo && searchDistrict && (
-          <FocusDistrict
-            districtGeo={districtGeo}
-            searchDistrict={searchDistrict}
-          />
-        )}
+        <FocusState stateGeo={stateGeo} selectedState={selectedState} />
+        <FocusDistrict districtGeo={districtGeo} selectedDistrict={selectedDistrict} />
+
       </MapContainer>
-
-      {/* POPUP */}
-      {popupDistrict && popupData && (
-        <div className="history-popup">
-          <div className="history-popup-header">
-            <h3>{formatDistrict(popupDistrict)}</h3>
-            <button
-              className="history-popup-close"
-              onClick={() => {
-                setPopupDistrict(null);
-                setPopupData(null);
-              }}
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="history-popup-body">
-            {popupData.totalFires === 0 ? (
-              <p className="muted">No historical fire records available</p>
-            ) : (
-              <div className="history-stats">
-                <div className="history-stat">
-                  <span className="label">Total Fires</span>
-                  <span className="value">{popupData.totalFires}</span>
-                </div>
-                <div className="history-stat">
-                  <span className="label">First Recorded</span>
-                  <span className="value">{popupData.firstFireDate}</span>
-                </div>
-                <div className="history-stat">
-                  <span className="label">Last Recorded</span>
-                  <span className="value">{popupData.lastFireDate}</span>
-                </div>
-              </div>
-            )}
-
-            <div className="history-footer">
-              Historical data derived from NASA FIRMS archives
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

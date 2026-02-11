@@ -264,3 +264,93 @@
 
   .legend { bottom: 16px; left: 16px; }
 }
+/* ===============================
+   ANALYTICS PANEL
+================================ */
+.analytics-panel {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border-radius: 14px;
+  margin-bottom: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  backdrop-filter: blur(8px);
+}
+
+.analytics-card {
+  min-width: 130px;
+  padding: 12px;
+  border-radius: 12px;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.analytics-card.high {
+  background: linear-gradient(135deg, #7f1d1d, #dc2626);
+}
+
+.analytics-card.medium {
+  background: linear-gradient(135deg, #92400e, #f59e0b);
+}
+
+.analytics-card.low {
+  background: linear-gradient(135deg, #065f46, #16a34a);
+}
+
+.analytics-card.list {
+  background: #1e293b;
+  text-align: left;
+}
+
+.analytics-card.list ul {
+  margin: 6px 0 0;
+  padding-left: 16px;
+}
+
+.analytics-card.list li {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* ===============================
+   RISK LEGEND
+================================ */
+.risk-legend {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(15, 23, 42, 0.9);
+  padding: 10px 14px;
+  border-radius: 12px;
+  color: #f8fafc;
+  font-size: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+}
+
+.risk-legend div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.risk-legend .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.risk-legend .dot.high {
+  background: #dc2626;
+}
+
+.risk-legend .dot.medium {
+  background: #f59e0b;
+}
+
+.risk-legend .dot.low {
+  background: #16a34a;
+}

@@ -511,25 +511,98 @@ body::before {
    REAL-TIME STATS FIX
 ================================ */
 
-.stat-value,
-.stat-number,
-.stat-card h3,
-.stat-card .value {
-  color: #f8fafc !important;   /* Starlight white */
-  font-weight: 700;
-  opacity: 1 !important;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
-}
+/* --- BASE CARD (Keep this as your foundation) --- */
 .stat-card {
-  background: rgba(15, 23, 42, 0.85); /* darker glass */
+  /* Dark Glass Base */
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  
+  /* Standard delicate border */
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
+  border-top-color: rgba(255, 255, 255, 0.15); /* Default white reflection */
+  
+  /* Default Shadow */
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1); /* Inner white top light */
+    
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+  overflow: hidden; /* Keeps the glow inside */
+}
+
+/* --- COLOR VARIANTS (Add these classes to .stat-card) --- */
+
+/* LOW (Green): Safe, calm energy */
+.stat-card.low {
+  /* Green top border reflection */
+  border-top-color: rgba(74, 222, 128, 0.6); 
+  /* Green internal ambient glow */
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 0 rgba(74, 222, 128, 0.5), /* Sharp top line */
+    inset 0 0 20px rgba(74, 222, 128, 0.1); /* Soft inner glow */
+}
+
+/* MEDIUM (Yellow): Warning, attention */
+.stat-card.medium {
+  /* Yellow/Amber top border reflection */
+  border-top-color: rgba(250, 204, 21, 0.6);
+  /* Yellow internal ambient glow */
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 0 rgba(250, 204, 21, 0.5),
+    inset 0 0 20px rgba(250, 204, 21, 0.1);
+}
+
+/* HIGH (Red): Critical, urgent */
+.stat-card.high {
+  /* Red top border reflection */
+  border-top-color: rgba(248, 113, 113, 0.6);
+  /* Red internal ambient glow */
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 0 rgba(248, 113, 113, 0.5),
+    inset 0 0 20px rgba(248, 113, 113, 0.15); /* Slightly stronger glow for red */
+}
+
+/* --- HOVER EFFECTS (Updated to respect colors) --- */
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Intensify the glow on hover */
+.stat-card.low:hover {
+  box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(74, 222, 128, 0.8), inset 0 0 30px rgba(74, 222, 128, 0.15);
+  border-color: rgba(74, 222, 128, 0.3);
+}
+.stat-card.medium:hover {
+  box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(250, 204, 21, 0.8), inset 0 0 30px rgba(250, 204, 21, 0.15);
+  border-color: rgba(250, 204, 21, 0.3);
+}
+.stat-card.high:hover {
+  box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(248, 113, 113, 0.8), inset 0 0 30px rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+/* --- TYPOGRAPHY (Keep as is) --- */
+.stat-value, .stat-number, .stat-card h3, .stat-card .value {
+  color: #f8fafc !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.2);
 }
 .stat-label {
-  color: #94a3b8; /* soft slate */
-  font-size: 0.65rem;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.1em;
+  margin-top: 0.5rem;
+  opacity: 0.9;
 }
 /* ===============================
    DONUT CHART (ANIMATED – BIOLUMINESCENT ZEN)
