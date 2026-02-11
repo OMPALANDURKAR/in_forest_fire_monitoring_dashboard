@@ -235,30 +235,41 @@ app.get("/api/history/:district", (req, res) => {
 // 🔴 FIRMS LIVE DATA (WITH CACHE)
 app.get("/api/fires-realtime", async (req, res) => {
   try {
+    const now = Date.now();
+
+    if (firmsCache && firmsLastFetch && now - firmsLastFetch < FIRMS_CACHE_DURATION) {
+      return res.json(firmsCache);
+    }
+
     const API_KEY = process.env.FIRMS_API_KEY;
 
-    const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${API_KEY}/MODIS_NRT/world/3`;
+    const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${API_KEY}/VIIRS_SNPP_NRT/72,6,97,37/1`;
 
     const response = await axios.get(url);
+    const csvData = response.data;
 
-    console.log("FIRMS RAW RESPONSE:");
-    console.log(response.data);
+    const rows = csvData.split("\n");
+    const headers = rows[0].split(",");
 
-    res.send(response.data);
+    const parsed = rows.slice(1).map(row => {
+      const values = row.split(",");
+      const obj = {};
+      headers.forEach((h, i) => {
+        obj[h.trim()] = values[i];
+      });
+      return obj;
+    });
+
+    firmsCache = parsed;
+    firmsLastFetch = now;
+
+    res.json(parsed);
 
   } catch (error) {
-    console.error("FIRMS ERROR STATUS:", error.response?.status);
-    console.error("FIRMS ERROR DATA:", error.response?.data);
-    console.error("FIRMS ERROR MESSAGE:", error.message);
-
-    res.status(500).json({
-      message: "FIRMS request failed",
-      status: error.response?.status,
-      data: error.response?.data,
-    });
+    console.error("❌ FIRMS fetch error:", error.message);
+    res.status(500).json({ error: "Failed to fetch FIRMS data" });
   }
 });
-
 
 // 🔻 404
 app.use((req, res) => {
