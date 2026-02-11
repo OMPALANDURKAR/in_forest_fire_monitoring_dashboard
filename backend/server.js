@@ -243,7 +243,7 @@ app.get("/api/fires-realtime", async (req, res) => {
 
     const API_KEY = process.env.FIRMS_API_KEY;
 
-const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${API_KEY}/VIIRS_NOAA20_NRT/60,0,100,40/5`;
+const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${API_KEY}/MODIS_NRT/world/3`;
 
     const response = await axios.get(url);
     const csvData = response.data;
