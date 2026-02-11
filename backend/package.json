@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@turf/turf": "^7.3.1",
+    "axios": "^1.13.5",
     "cors": "^2.8.5",
     "csvtojson": "^2.0.14",
     "dotenv": "^17.2.3",

@@ -33,7 +33,6 @@ const normalizeState = (name) =>
 const getDistrictName = (p) =>
   p?.DISTRICT || p?.district || p?.NAME_3 || p?.NAME_2 || p?.dtname || null;
 
-/* 🔥 FIXED — use ONLY NAME_1 (confirmed from backend response) */
 const getStateName = (p) => p?.NAME_1 || null;
 
 const isValidGeoJSON = (geo) =>
@@ -129,7 +128,12 @@ const FireMap = ({
   const [stateGeo, setStateGeo] = useState(null);
   const [stateRisk, setStateRisk] = useState([]);
 
-  /* FETCH DATA */
+  /* 🆕 State Historical Popup Data */
+  const [stateHistoryData, setStateHistoryData] = useState(null);
+
+  /* ===============================
+     FETCH DATA
+  ================================ */
   useEffect(() => {
     fetch(`${API_BASE}/api/fires`).then(r => r.json()).then(setMapFires);
     fetch(`${API_BASE}/api/districts`).then(r => r.json()).then(setDistrictGeo);
@@ -190,15 +194,31 @@ const FireMap = ({
       setSelectedDistrict(null);
     }
 
-  }, [
-    searchDistrict,
-    stateGeo,
-    districtGeo,
-    setSelectedState,
-    setSelectedDistrict
-  ]);
+  }, [searchDistrict, stateGeo, districtGeo]);
 
-  /* FILTER FIRES */
+  /* ===============================
+     🆕 FETCH STATE HISTORICAL DATA
+  ================================ */
+  useEffect(() => {
+    if (!selectedState) {
+      setStateHistoryData(null);
+      return;
+    }
+
+    fetch(`${API_BASE}/api/predict-state/${selectedState}`)
+      .then(res => res.json())
+      .then(data => {
+        setStateHistoryData(data);
+      })
+      .catch(() => {
+        setStateHistoryData(null);
+      });
+
+  }, [selectedState]);
+
+  /* ===============================
+     FILTER FIRES
+  ================================ */
   const finalFires = useMemo(() => {
     return mapFires.filter((f) => {
       if (f.brightness > 350 && !riskFilter.high) return false;
@@ -287,8 +307,34 @@ const FireMap = ({
 
         <FocusState stateGeo={stateGeo} selectedState={selectedState} />
         <FocusDistrict districtGeo={districtGeo} selectedDistrict={selectedDistrict} />
-
       </MapContainer>
+
+      {/* 🆕 FIXED STATE HISTORICAL POPUP */}
+      {selectedState && stateHistoryData && (
+        <div className="state-history-popup">
+          <div className="state-popup-header">
+            <h3>{selectedState}</h3>
+            <button onClick={() => setSelectedState(null)}>✕</button>
+          </div>
+
+          <div className="state-popup-body">
+            <div>
+              <span>Total Historical Fires:</span>
+              <strong>{stateHistoryData.historicalFireCount}</strong>
+            </div>
+
+            <div>
+              <span>Risk Level:</span>
+              <strong>{stateHistoryData.riskLevel}</strong>
+            </div>
+
+            <div>
+              <span>Risk Percentage:</span>
+              <strong>{stateHistoryData.riskPercentage}%</strong>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

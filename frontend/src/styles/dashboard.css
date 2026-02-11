@@ -685,3 +685,75 @@ body::before {
 .chart-legend .high { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
 .chart-legend .medium { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
 .chart-legend .low { background: #10b981; box-shadow: 0 0 6px #10b981; }
+/* Core Container: Dark Glass + Bioluminescent Glow */
+.state-history-popup {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 300px;
+  
+  /* The Dark Glass Effect */
+  background: rgba(10, 12, 16, 0.75); /* Deep midnight, see-through */
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  
+  /* Bioluminescent Border & Glow */
+  border: 1px solid rgba(0, 243, 255, 0.15); /* Subtle Cyan Edge */
+  border-top: 1px solid rgba(0, 243, 255, 0.4); /* Highlighted Top Edge */
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.6), /* Deep Drop Shadow */
+    0 0 20px rgba(0, 243, 255, 0.1), /* Outer Glow */
+    inset 0 0 20px rgba(0, 243, 255, 0.05); /* Inner Atmosphere */
+    
+  color: #e2e8f0;
+  padding: 20px;
+  border-radius: 20px; /* Softer, modern corners */
+  z-index: 999;
+  
+  /* Smooth Entry */
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden; /* Contains the glowing effects */
+}
+
+/* Optional: Slight Lift & Intensity on Hover */
+.state-history-popup:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.7),
+    0 0 30px rgba(0, 243, 255, 0.2),
+    inset 0 0 25px rgba(0, 243, 255, 0.08);
+  border-color: rgba(0, 243, 255, 0.3);
+}
+
+/* Header Styling */
+.state-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  
+  /* Typography Pop */
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.4); /* Glowing Text */
+}
+
+/* Ambient "Zen" Light Beam (Top Gradient) */
+.state-history-popup::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg, 
+    transparent 0%, 
+    rgba(0, 243, 255, 0.8) 50%, 
+    transparent 100%
+  );
+  opacity: 0.7;
+}

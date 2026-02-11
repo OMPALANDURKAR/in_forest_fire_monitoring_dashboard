@@ -10,6 +10,7 @@ const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
 const compression = require("compression");
+const axios = require("axios");
 
 // ================================
 // APP INIT
@@ -26,7 +27,7 @@ app.use(express.json());
 app.use(compression());
 
 // ================================
-// 🔥 HEALTH CHECK
+// HEALTH CHECK
 // ================================
 app.get("/", (req, res) => {
   res.status(200).json({ status: "OK" });
@@ -36,16 +37,20 @@ app.get("/", (req, res) => {
 // IN-MEMORY CACHES
 // ================================
 let historicalFires = null;
-let realtimeFires = null;
 let districtRisk = null;
 let districtsGeoJSON = null;
 let statesGeoJSON = null;
 let stateRisk = null;
 
+/* 🔥 FIRMS LIVE CACHE */
+let firmsCache = null;
+let firmsLastFetch = null;
+
 // ================================
 // CONFIG
 // ================================
 const MAX_HISTORICAL_FIRES = 300;
+const FIRMS_CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
 // ================================
 // HELPERS
@@ -62,13 +67,6 @@ function loadHistoricalFires() {
   if (!historicalFires) {
     historicalFires = require("./data/fires_with_location.json");
     console.log("✅ Loaded fires_with_location.json");
-  }
-}
-
-function loadRealtimeFires() {
-  if (!realtimeFires) {
-    realtimeFires = require("./data/fires_realtime.json");
-    console.log("✅ Loaded fires_realtime.json");
   }
 }
 
@@ -94,9 +92,7 @@ function loadDistrictsGeoJSON() {
         "utf8"
       )
     );
-    console.log(
-      `✅ Loaded india_districts.geojson (${districtsGeoJSON.features.length} features)`
-    );
+    console.log(`✅ Loaded india_districts.geojson`);
   }
 }
 
@@ -108,9 +104,7 @@ function loadStatesGeoJSON() {
         "utf8"
       )
     );
-    console.log(
-      `✅ Loaded india_states.geojson (${statesGeoJSON.features.length} features)`
-    );
+    console.log(`✅ Loaded india_states.geojson`);
   }
 }
 
@@ -122,28 +116,6 @@ function loadStatesGeoJSON() {
 app.get("/api/fires", (req, res) => {
   loadHistoricalFires();
   res.json(historicalFires.slice(0, MAX_HISTORICAL_FIRES));
-});
-
-// 🔴 REAL-TIME STATUS (DISTRICT)
-app.get("/api/realtime/:district", (req, res) => {
-  loadRealtimeFires();
-
-  const district = normalize(req.params.district);
-
-  const matches = realtimeFires.filter(
-    (f) => normalize(f.district) === district
-  );
-
-  res.json({
-    district,
-    activeFires: matches.length,
-    status:
-      matches.length > 0
-        ? "Active Fires Detected"
-        : "No Active Fires",
-    source: "NASA FIRMS (Near Real-Time)",
-    lastUpdated: new Date().toISOString(),
-  });
 });
 
 // 📊 DISTRICT RISK
@@ -160,28 +132,17 @@ app.get("/api/state-risk", (req, res) => {
 
 // 🗺️ DISTRICT GEOJSON
 app.get("/api/districts", (req, res) => {
-  try {
-    loadDistrictsGeoJSON();
-    res.json(districtsGeoJSON);
-  } catch (err) {
-    console.error("❌ District GeoJSON error:", err);
-    res.status(500).json({ error: "Failed to load district GeoJSON" });
-  }
+  loadDistrictsGeoJSON();
+  res.json(districtsGeoJSON);
 });
 
-// 🗺️ STATE GEOJSON (CRITICAL)
+// 🗺️ STATE GEOJSON
 app.get("/api/states", (req, res) => {
-  try {
-    loadStatesGeoJSON();
-    console.log("📍 /api/states requested");
-    res.json(statesGeoJSON);
-  } catch (err) {
-    console.error("❌ State GeoJSON error:", err);
-    res.status(500).json({ error: "Failed to load state GeoJSON" });
-  }
+  loadStatesGeoJSON();
+  res.json(statesGeoJSON);
 });
 
-// 🔮 AI PREDICT
+// 🔮 DISTRICT PREDICT
 app.get("/api/predict/:district", (req, res) => {
   loadHistoricalFires();
 
@@ -210,34 +171,32 @@ app.get("/api/predict/:district", (req, res) => {
     logic: "Derived from historical fire frequency",
   });
 });
-// 🔮 AI RISK OUTLOOK (STATE LEVEL)
+
+// 🔮 STATE PREDICT (FIXED USING state_risk.json)
 app.get("/api/predict-state/:state", (req, res) => {
-  loadHistoricalFires();
+  loadStateRisk();
 
-  const state = req.params.state.toLowerCase().replace(/\s+/g, "");
+  const stateParam = normalize(req.params.state);
 
-  const count = historicalFires.filter(
-    f => f.state &&
-         f.state.toLowerCase().replace(/\s+/g, "") === state
-  ).length;
+  const stateData = stateRisk.find(
+    (s) => normalize(s.state) === stateParam
+  );
 
-  let riskLevel = "Low";
-  let riskPercentage = 20;
-
-  if (count > 300) {
-    riskLevel = "High";
-    riskPercentage = 85;
-  } else if (count > 100) {
-    riskLevel = "Medium";
-    riskPercentage = 55;
+  if (!stateData) {
+    return res.status(404).json({ error: "State not found" });
   }
 
   res.json({
-    state,
-    historicalFireCount: count,
-    riskLevel,
-    riskPercentage,
-    logic: "Derived from historical fire frequency (state-level aggregation)",
+    state: stateData.state,
+    historicalFireCount: stateData.fireCount,
+    riskLevel: stateData.risk,
+    riskPercentage:
+      stateData.risk === "High"
+        ? 85
+        : stateData.risk === "Medium"
+        ? 55
+        : 20,
+    logic: "Derived from aggregated historical fire frequency (state-level)",
   });
 });
 
@@ -257,7 +216,6 @@ app.get("/api/history/:district", (req, res) => {
       totalFires: 0,
       firstFireDate: null,
       lastFireDate: null,
-      message: "No historical fire records found",
     });
   }
 
@@ -274,10 +232,43 @@ app.get("/api/history/:district", (req, res) => {
   });
 });
 
-// 🔴 ALL INDIA REALTIME
-app.get("/api/fires-realtime", (req, res) => {
-  loadRealtimeFires();
-  res.json(realtimeFires);
+// 🔴 FIRMS LIVE DATA (WITH CACHE)
+app.get("/api/fires-realtime", async (req, res) => {
+  try {
+    const now = Date.now();
+
+    if (firmsCache && firmsLastFetch && now - firmsLastFetch < FIRMS_CACHE_DURATION) {
+      return res.json(firmsCache);
+    }
+
+    const API_KEY = process.env.FIRMS_API_KEY;
+
+    const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${API_KEY}/VIIRS_SNPP_NRT/72,6,97,37/1`;
+
+    const response = await axios.get(url);
+    const csvData = response.data;
+
+    const rows = csvData.split("\n");
+    const headers = rows[0].split(",");
+
+    const parsed = rows.slice(1).map(row => {
+      const values = row.split(",");
+      const obj = {};
+      headers.forEach((h, i) => {
+        obj[h.trim()] = values[i];
+      });
+      return obj;
+    });
+
+    firmsCache = parsed;
+    firmsLastFetch = now;
+
+    res.json(parsed);
+
+  } catch (error) {
+    console.error("❌ FIRMS fetch error:", error.message);
+    res.status(500).json({ error: "Failed to fetch FIRMS data" });
+  }
 });
 
 // 🔻 404
