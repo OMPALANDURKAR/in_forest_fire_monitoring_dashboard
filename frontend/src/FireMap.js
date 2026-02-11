@@ -33,13 +33,8 @@ const normalizeState = (name) =>
 const getDistrictName = (p) =>
   p?.DISTRICT || p?.district || p?.NAME_3 || p?.NAME_2 || p?.dtname || null;
 
-const getStateName = (p) =>
-  p?.st_nm ||
-  p?.STATE ||
-  p?.STATE_NAME ||
-  p?.State_Name ||
-  p?.NAME_1 ||
-  null;
+/* 🔥 FIXED — use ONLY NAME_1 (confirmed from backend response) */
+const getStateName = (p) => p?.NAME_1 || null;
 
 const isValidGeoJSON = (geo) =>
   geo &&
@@ -143,7 +138,7 @@ const FireMap = ({
   }, []);
 
   /* ===============================
-     SEARCH HANDLER (FINAL)
+     SEARCH HANDLER
   ================================ */
   useEffect(() => {
     if (!searchDistrict) {
@@ -190,7 +185,6 @@ const FireMap = ({
       }
     }
 
-    // ❌ If nothing matched → clear selection
     if (!matched) {
       setSelectedState(null);
       setSelectedDistrict(null);

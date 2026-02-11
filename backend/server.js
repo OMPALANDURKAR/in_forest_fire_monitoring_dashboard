@@ -210,6 +210,36 @@ app.get("/api/predict/:district", (req, res) => {
     logic: "Derived from historical fire frequency",
   });
 });
+// 🔮 AI RISK OUTLOOK (STATE LEVEL)
+app.get("/api/predict-state/:state", (req, res) => {
+  loadHistoricalFires();
+
+  const state = req.params.state.toLowerCase().replace(/\s+/g, "");
+
+  const count = historicalFires.filter(
+    f => f.state &&
+         f.state.toLowerCase().replace(/\s+/g, "") === state
+  ).length;
+
+  let riskLevel = "Low";
+  let riskPercentage = 20;
+
+  if (count > 300) {
+    riskLevel = "High";
+    riskPercentage = 85;
+  } else if (count > 100) {
+    riskLevel = "Medium";
+    riskPercentage = 55;
+  }
+
+  res.json({
+    state,
+    historicalFireCount: count,
+    riskLevel,
+    riskPercentage,
+    logic: "Derived from historical fire frequency (state-level aggregation)",
+  });
+});
 
 // 📊 DISTRICT HISTORY
 app.get("/api/history/:district", (req, res) => {

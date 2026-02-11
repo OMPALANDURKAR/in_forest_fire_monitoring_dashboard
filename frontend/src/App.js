@@ -20,42 +20,34 @@ function App() {
      GLOBAL STATES
   ================================ */
 
-  // 🔍 Search input
   const [searchDistrict, setSearchDistrict] = useState("");
 
-  // 🗺 Selected region (GLOBAL SOURCE)
   const [selectedState, setSelectedState] = useState(null);
   const [selectedDistrict, setSelectedDistrict] = useState(null);
 
-  // 🎚 Risk filters
   const [riskFilter, setRiskFilter] = useState({
     high: true,
     medium: true,
     low: true,
   });
 
-  // 📅 Date filters
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  // 🔥 Sidebar real-time info
   const [realtimeInfo, setRealtimeInfo] = useState(null);
   const [loadingRealtime, setLoadingRealtime] = useState(false);
 
-  // 🔮 Sidebar AI risk
   const [futureRisk, setFutureRisk] = useState(null);
   const [loadingFuture, setLoadingFuture] = useState(false);
-
-  /* ===============================
-     RESET WHEN SEARCH CLEARED
-  ================================ */
- 
 
   /* ===============================
      REAL-TIME FIRE STATUS
   ================================ */
   useEffect(() => {
-    if (!searchDistrict) return;
+    if (!searchDistrict) {
+      setRealtimeInfo(null);
+      return;
+    }
 
     setLoadingRealtime(true);
 
@@ -75,14 +67,26 @@ function App() {
   }, [searchDistrict]);
 
   /* ===============================
-     AI RISK OUTLOOK
+     AI RISK OUTLOOK (SMART SWITCH)
   ================================ */
   useEffect(() => {
-    if (!searchDistrict) return;
+
+    if (!selectedState && !selectedDistrict) {
+      setFutureRisk(null);
+      return;
+    }
 
     setLoadingFuture(true);
 
-    fetch(`${API_BASE}/api/predict/${searchDistrict.toLowerCase()}`)
+    let endpoint = "";
+
+    if (selectedState) {
+      endpoint = `/api/predict-state/${selectedState}`;
+    } else if (selectedDistrict) {
+      endpoint = `/api/predict/${selectedDistrict}`;
+    }
+
+    fetch(`${API_BASE}${endpoint}`)
       .then(res => {
         if (!res.ok) throw new Error("Predict API failed");
         return res.json();
@@ -95,7 +99,7 @@ function App() {
       })
       .finally(() => setLoadingFuture(false));
 
-  }, [searchDistrict]);
+  }, [selectedState, selectedDistrict]);
 
   /* ===============================
      RENDER
