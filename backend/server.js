@@ -242,10 +242,10 @@ app.get("/api/fires-realtime", async (req, res) => {
       return res.json(firmsCache);
     }
 
-    const API_KEY = process.env.FIRMS_API_KEY;
+    const API_KEY = process.env.FIRMS_KEY;
 
     if (!API_KEY) {
-      return res.status(500).json({ error: "FIRMS_API_KEY not configured" });
+      return res.status(500).json({ error: "FIRMS_KEY not configured" });
     }
 
     const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${API_KEY}/MODIS_NRT/world/1`;
