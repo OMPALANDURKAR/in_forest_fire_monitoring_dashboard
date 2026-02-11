@@ -232,27 +232,63 @@ app.get("/api/history/:district", (req, res) => {
   });
 });
 
-// 🔴 FIRMS LIVE DATA (WITH CACHE)
+// 🔴 FIRMS LIVE DATA (WITH CACHE + SAFE PARSING)
 app.get("/api/fires-realtime", async (req, res) => {
   try {
+    const now = Date.now();
+
+    // 🔁 Serve from cache if within duration
+    if (firmsCache && firmsLastFetch && now - firmsLastFetch < FIRMS_CACHE_DURATION) {
+      return res.json(firmsCache);
+    }
+
     const API_KEY = process.env.FIRMS_API_KEY;
+
+    if (!API_KEY) {
+      return res.status(500).json({ error: "FIRMS_API_KEY not configured" });
+    }
 
     const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${API_KEY}/MODIS_NRT/world/1`;
 
     const response = await axios.get(url);
 
-    console.log("RAW DATA:");
-    console.log(response.data);
+    const csvData = response.data;
 
-    res.send(response.data);
+    // 🔍 If empty or only header
+    if (!csvData || !csvData.includes("\n")) {
+      firmsCache = [];
+      firmsLastFetch = now;
+      return res.json([]);
+    }
 
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Error");
+    const rows = csvData.trim().split("\n");
+    const headers = rows[0].split(",");
+
+    if (rows.length <= 1) {
+      firmsCache = [];
+      firmsLastFetch = now;
+      return res.json([]);
+    }
+
+    const parsed = rows.slice(1).map(row => {
+      const values = row.split(",");
+      const obj = {};
+      headers.forEach((h, i) => {
+        obj[h.trim()] = values[i];
+      });
+      return obj;
+    });
+
+    firmsCache = parsed;
+    firmsLastFetch = now;
+
+    res.json(parsed);
+
+  } catch (error) {
+    console.error("🔥 FIRMS FETCH ERROR:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to fetch FIRMS data" });
   }
 });
-
-
 // 🔻 404
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
