@@ -234,6 +234,9 @@ app.get("/api/history/:district", (req, res) => {
 
 // 🔴 FIRMS LIVE DATA (WITH CACHE)
 app.get("/api/fires-realtime", async (req, res) => {
+  console.log("RAW FIRMS RESPONSE:");
+console.log(response.data);
+
   try {
     const now = Date.now();
 
@@ -243,7 +246,7 @@ app.get("/api/fires-realtime", async (req, res) => {
 
     const API_KEY = process.env.FIRMS_API_KEY;
 
-const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${API_KEY}/MODIS_NRT/world/3`;
+const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/YOUR_KEY/MODIS_NRT/world/1`;
 
     const response = await axios.get(url);
     const csvData = response.data;
