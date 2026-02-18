@@ -128,11 +128,11 @@ const FireMap = ({
   const [stateGeo, setStateGeo] = useState(null);
   const [stateRisk, setStateRisk] = useState([]);
 
-  /* 🆕 State Historical Popup Data */
   const [stateHistoryData, setStateHistoryData] = useState(null);
+  const [districtHistoryData, setDistrictHistoryData] = useState(null); // ✅ NEW
 
   /* ===============================
-     FETCH DATA
+     FETCH STATIC DATA
   ================================ */
   useEffect(() => {
     fetch(`${API_BASE}/api/fires`).then(r => r.json()).then(setMapFires);
@@ -153,7 +153,7 @@ const FireMap = ({
 
     let matched = false;
 
-    // 🔵 STATE SEARCH
+    // STATE SEARCH
     if (isValidGeoJSON(stateGeo)) {
       const stateMatch = stateGeo.features.find((f) => {
         const stateName = getStateName(f.properties);
@@ -171,7 +171,7 @@ const FireMap = ({
       }
     }
 
-    // 🟢 DISTRICT SEARCH
+    // DISTRICT SEARCH
     if (!matched && isValidGeoJSON(districtGeo)) {
       const districtMatch = districtGeo.features.find((f) => {
         const districtName = getDistrictName(f.properties);
@@ -197,7 +197,7 @@ const FireMap = ({
   }, [searchDistrict, stateGeo, districtGeo]);
 
   /* ===============================
-     🆕 FETCH STATE HISTORICAL DATA
+     FETCH STATE HISTORY
   ================================ */
   useEffect(() => {
     if (!selectedState) {
@@ -207,14 +207,26 @@ const FireMap = ({
 
     fetch(`${API_BASE}/api/predict-state/${selectedState}`)
       .then(res => res.json())
-      .then(data => {
-        setStateHistoryData(data);
-      })
-      .catch(() => {
-        setStateHistoryData(null);
-      });
+      .then(setStateHistoryData)
+      .catch(() => setStateHistoryData(null));
 
   }, [selectedState]);
+
+  /* ===============================
+     FETCH DISTRICT HISTORY  ✅ NEW
+  ================================ */
+  useEffect(() => {
+    if (!selectedDistrict) {
+      setDistrictHistoryData(null);
+      return;
+    }
+
+    fetch(`${API_BASE}/api/history/${selectedDistrict}`)
+      .then(res => res.json())
+      .then(setDistrictHistoryData)
+      .catch(() => setDistrictHistoryData(null));
+
+  }, [selectedDistrict]);
 
   /* ===============================
      FILTER FIRES
@@ -253,20 +265,17 @@ const FireMap = ({
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
         />
 
-        {/* STATES */}
         {isValidGeoJSON(stateGeo) && (
           <GeoJSON
             pane="statesPane"
             data={stateGeo}
             style={(feature) => {
               const stateName = getStateName(feature.properties);
-
               const risk = stateRisk.find(
                 (s) =>
                   normalizeState(s.state) ===
                   normalizeState(stateName)
               );
-
               const active =
                 normalizeState(stateName) ===
                 normalizeState(selectedState);
@@ -281,7 +290,6 @@ const FireMap = ({
           />
         )}
 
-        {/* DISTRICTS */}
         {isValidGeoJSON(districtGeo) && (
           <GeoJSON
             pane="districtsPane"
@@ -295,7 +303,6 @@ const FireMap = ({
           />
         )}
 
-        {/* FIRE MARKERS */}
         {finalFires.map((f, i) => (
           <CircleMarker
             key={i}
@@ -309,32 +316,36 @@ const FireMap = ({
         <FocusDistrict districtGeo={districtGeo} selectedDistrict={selectedDistrict} />
       </MapContainer>
 
-      {/* 🆕 FIXED STATE HISTORICAL POPUP */}
+      {/* STATE POPUP */}
       {selectedState && stateHistoryData && (
         <div className="state-history-popup">
-          <div className="state-popup-header">
-            <h3>{selectedState}</h3>
-            <button onClick={() => setSelectedState(null)}>✕</button>
-          </div>
-
-          <div className="state-popup-body">
-            <div>
-              <span>Total Historical Fires:</span>
-              <strong>{stateHistoryData.historicalFireCount}</strong>
-            </div>
-
-            <div>
-              <span>Risk Level:</span>
-              <strong>{stateHistoryData.riskLevel}</strong>
-            </div>
-
-            <div>
-              <span>Risk Percentage:</span>
-              <strong>{stateHistoryData.riskPercentage}%</strong>
-            </div>
-          </div>
+          <h3>{selectedState}</h3>
+          <div>Total Fires: {stateHistoryData.historicalFireCount}</div>
+          <div>Risk: {stateHistoryData.riskLevel}</div>
+          <div>Risk %: {stateHistoryData.riskPercentage}%</div>
         </div>
       )}
+
+      {/* DISTRICT POPUP  ✅ RESTORED */}
+      {selectedDistrict && (
+  <div className="district-history-popup">
+    <div className="popup-header">
+      <h3>{selectedDistrict}</h3>
+      <button onClick={() => setSelectedDistrict(null)}>✕</button>
+    </div>
+
+    {districtHistoryData ? (
+      <>
+        <div>Total Fires: {districtHistoryData.totalFires ?? 0}</div>
+        <div>First Fire: {districtHistoryData.firstFireDate ?? "N/A"}</div>
+        <div>Last Fire: {districtHistoryData.lastFireDate ?? "N/A"}</div>
+      </>
+    ) : (
+      <div>Loading...</div>
+    )}
+  </div>
+)}
+
     </div>
   );
 };
